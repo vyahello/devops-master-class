@@ -22,7 +22,7 @@ IAAC - create infra the same way you create your software code. Create infra - s
 ## Docker
 
 Reasons - application packaging (same for java, python, js), multi-platform (local machine, data center, cloud), 
-light-weight compared to VM, isolated containers.
+light-weight compared to VM (only specific packages used), isolated containers.
 
 VM - hardware, host os, hypervisor, software, app.
 
@@ -84,4 +84,16 @@ docker system prune  # Remove unused data
 docker system prune -a  # Remove all unused data, when u r out of memory, delete images which are not used 
 docker stats eb946c3b7960  # Check used CPU, memory
 docker container run -d -p 5002:8080 -m 512m --cpu-quota=50000 in28min/hello-world-java:0.0.1.RELEASE  # use only 512m of memory, 50% of cpu
+```
+
+
+#### Docker build
+
+```bash
+cd docker/hello-world/python
+docker build -t vyahello/hello-python:0.0.1 .
+docker run -p 5001:5000 vyahello/hello-python:0.0.1
+docker history 8e70e65991af  # check build layers
+docker login
+docker push vyahello/hello-python:0.0.1
 ```
