@@ -97,3 +97,9 @@ docker history 8e70e65991af  # check build layers
 docker login
 docker push vyahello/hello-python:0.0.1
 ```
+
+_ENTRYPOINT_ vs _CMD_ 
+
+ENTRYPOINT is used to be static, but you can overwrite via `--entrypoint` cli arg
+
+CMD is used to be modified
