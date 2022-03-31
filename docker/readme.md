@@ -24,6 +24,8 @@ IAAC - create infra the same way you create your software code. Create infra - s
 Reasons - application packaging (same for java, python, js), multi-platform (local machine, data center, cloud), 
 light-weight compared to VM (only specific packages used), isolated containers.
 
+No more - "Works in my local machine".
+
 VM - hardware, host os, hypervisor, software, app.
 
 Docker - infra, host os, docker engine, container. Isolated from each other, set specific % of CPU.
@@ -103,3 +105,36 @@ _ENTRYPOINT_ vs _CMD_
 ENTRYPOINT is used to be static, but you can overwrite via `--entrypoint` cli arg
 
 CMD is used to be modified
+
+### Microservices
+
+Instead of building one monolith, use small microservices.
+
+Service1 (node) -> Service2 (python) -> Service3 (sql)
+
+Share same network:
+```bash
+docker network ls  # check local networks
+docker network inspect bridge  # if containers are in bridge network, they cant talk to each other
+# let one container talk to other via 'link'
+docker run -p 8100:8100 -d --name=currency-conversion --link=currency-exchange --env=CURRENCY_EXCHANGE_SERVICE_HOST=http://currency-exchange in28min/currency-conversion:0.0.1-RELEASE
+# run in host network, but available only on Linux
+
+# create 'custom' network
+docker network create currency-network
+docker run -p 8000:8000 -d --name=currency-exchange --network=currency-network in28min/currency-exchange:0.0.1-RELEASE
+docker run -p 8100:8100 -d --name=currency-conversion --env=CURRENCY_EXCHANGE_SERVICE_HOST=http://currency-exchange --network=currency-network in28min/currency-conversion:0.0.1-RELEASE
+```
+
+#### Docker compose 
+
+```bash
+docker-compose up
+docker-compose up -d
+docker network ls  # see new network 'microservices_currency'
+docker network inspect 08e5c9121d20
+docker-compose config  # validate yaml file
+docker-compose images
+docker-compose top 
+docker-compose down
+```
