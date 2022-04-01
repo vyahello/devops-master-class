@@ -1,5 +1,7 @@
 # Kubernetes
 
+Cheat sheet - https://kubernetes.io/docs/reference/kubectl/cheatsheet
+
 Use case - increase number of docker instances in case of huge load. Make load balancing between available docker instances.
 When instance is down it can bring an instance up.
 
@@ -48,3 +50,64 @@ kubectl expose deployment hello-world-rest-api --type=LoadBalancer --port=8080
 ```
 
 Go to services and ingresses and check deployment and check http://35.188.132.193:8080/hello-world deployment.
+
+```bash
+kubectl get pods
+kubectl get replicaset
+kubectl get deployment
+kubectl get service
+```
+
+`kubectl create deployment` -> deployment, replicaset and pod
+
+`kubectl expose deployment` -> service
+
+## POD
+
+POD - smallest deployable unit. You cannot have a container without a POD. Container lives inside a POD. POD is a collection of containers that can run on a host.
+
+POD puts containers together. On any node can be multiple pods. Each pod can contain multiple containers.
+
+Node -> POD1 (Container1 and Container2) and POD2 (Container3 and Container4).
+
+```bash
+kubectl get pods -o wide  # get ip of a POD
+kubectl explain pods
+kubectl describe pod hello-world-rest-api-687d9c7bc7-2722m
+```
+
+Delete POD
+```bash
+kubectl get pods,services,deployments,jobs
+kubectl delete -n default deployment hello-world-rest-api
+kubectl get replicaset  # DESIRED = 3
+# track what happened 
+kubectl get events
+# sort by time
+kubectl get events --sort-by=.metadata.creationTimestamp
+```
+
+## Replicaset 
+
+Ensure that specific number of PODs run all the time. If one POD is down, it will create a new POD.
+It is all about maintaining the number of PODs.
+
+POD is where your containers run, provides a grouping of containers. Replicaset ensures that a N of PODs are always running.
+
+Help:
+```bash
+kubectl explain replicaset
+```
+
+```bash
+kubectl get replicaset
+kubectl get rs  # same
+kubectl get pods -o wide
+# pod is absent, but new one is created instead, because of replicaset
+kubectl delete pod hello-world-rest-api-687d9c7bc7-2722m
+# run 3 replicas of a container
+kubectl scale deployment hello-world-rest-api --replicas=3
+# now 3 pods
+kubectl get pods
+```
+
