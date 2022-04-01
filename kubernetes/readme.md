@@ -80,6 +80,7 @@ Delete POD
 ```bash
 kubectl get pods,services,deployments,jobs
 kubectl delete -n default deployment hello-world-rest-api
+kubectl delete -n default deployment.apps/fast-weather
 kubectl get replicaset  # DESIRED = 3
 # track what happened 
 kubectl get events
@@ -195,4 +196,44 @@ etcd-0               Healthy   {"health":"true"}
 controller-manager   Healthy   ok
 etcd-1               Healthy   {"health":"true"}
 scheduler            Healthy   ok
+```
+
+## Install GCloud & kubectl
+
+GCloud - cmd interface for google cloud. 
+
+Follow gcloud instructions - https://cloud.google.com/sdk/docs/install
+
+```bash
+gcloud init
+gcloud container clusters get-credentials in28minutes-cluster --zone us-central1-c --project carbon-hulling-345821
+```
+
+Follow kubectl instruction - https://kubernetes.io/docs/tasks/tools/install-kubectl-macos
+
+## Switch K8S context 
+
+Useful to switch between gcloud and local docker desktop instance.
+
+```bash
+kubectl config get-contexts
+kubectl config use-context <context>
+```
+
+## Rollout 
+
+```bash
+kubectl rollout history deployment hello-world-rest-api
+# record to history
+kubectl set image deployment hello-world-rest-api hello-world-rest-api=in28min/hello-world-rest-api:0.0.3.RELEASE --record=true
+# now it has a rollout record 
+kubectl rollout history deployment hello-world-rest-api
+# check if V3 is properly deployed 
+curl http://35.188.132.193:8080/hello-world
+# rollback to previous revision
+kubectl rollout undo deployment hello-world-rest-api --to-revision=1
+# check if V1 is properly rolled out 
+curl http://35.188.132.193:8080/hello-world
+# check logs of a POD, same as docker logs and image ID
+kubectl logs hello-world-rest-api-687d9c7bc7-5vrf6
 ```
