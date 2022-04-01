@@ -137,6 +137,8 @@ kubectl get pods
 kubectl get rs 
 # check background events
 kubectl get events --sort-by=.metadata.creationTimestamp -o wide
+# get deployment YAML config 
+kubectl get deployment hello-world-rest-api -o yaml
 ```
 
 ## Service 
@@ -161,3 +163,36 @@ kubectl get services  # will show load balancer and cluster ip
 Go to `Workload` to see deployments, you can scale, edit, roll update of deployments. 
 You can check release history, details, events, see YAML config etc.
 
+## Master vs Worker nodes 
+
+Master node: api server (kube-apiserver), db (etcd), scheduler (kube-scheduler), controller manager (kube-controller-manager).
+
+- All config, deployment, services, scaling, detail stored in DB.
+- Scheduler responsible for scheduling PODs into the nodes. In k8s cluster you have several nodes. 
+When we create a new POD, you have to decide which node the POD has to be scheduled. 
+Schedules PODs onto appropriate node.
+
+- Container manager - kubectl, make sure that actual state of k8s cluster matches with desired state.
+- User apps will not be run on master node, but in PODs inside worker node.
+
+Worker node: node agent (kubelet), network component (kube-proxy), container runtime (CRI - docker, rkt), PODs (multiple pods running containers)
+
+- On a single node you can have multiple pods.
+- Kubelet - monitors what happens on the node and send it to master node.
+- Kube-proxy - expose deployment as a service.
+- Container runtime - docker
+
+Master node does not run apps, it contains tools to control worker nodes.
+
+K8S can run not only docker containers.
+
+If master goes down, app will run anyway.
+
+```bash
+kubectl get componentstatuses  # check all components
+NAME                 STATUS    MESSAGE             ERROR
+etcd-0               Healthy   {"health":"true"}
+controller-manager   Healthy   ok
+etcd-1               Healthy   {"health":"true"}
+scheduler            Healthy   ok
+```
