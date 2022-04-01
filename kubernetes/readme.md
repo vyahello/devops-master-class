@@ -27,6 +27,24 @@ kubectl set image deployment hello-world-rest-api hello-world-rest-api=in28min/h
 
 ## Cluster 
 
+Cluster is a set of master node(s)(manage cluster, manage the nodes) and worker node(s)(run your application, do the work).
+
+Kubernetes can manage 1k nodes.
+
 Create google cloud account at https://console.cloud.google.com
 
-Cluster is a set of master node(s)(manages cluster) and worker node(s)(run your application).
+Go to google cloud platform and create a kubernetes cluster.
+
+Kubernetes on Cloud: AKS (azure), Amazon EKS (elastic kubernetes service) and GKE (google kuber engine).
+
+Go to cloud shell and connect to cluster
+```bash
+gcloud container clusters get-credentials in28minutes-cluster --zone us-central1-c --project carbon-hulling-345821
+kubectl version
+# deploy application to a kubernetes cluster
+kubectl create deployment hello-world-rest-api --image=in28min/hello-world-rest-api:0.0.1.RELEASE
+# expose deployment to the outside world
+kubectl expose deployment hello-world-rest-api --type=LoadBalancer --port=8080
+```
+
+Go to services and ingresses and check deployment and check http://35.188.132.193:8080/hello-world deployment.
