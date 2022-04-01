@@ -111,3 +111,27 @@ kubectl scale deployment hello-world-rest-api --replicas=3
 kubectl get pods
 ```
 
+## Deployment
+
+Deployment -> Replicaset1 (POD1 and POD2) and Replicase2 (POD3 and POD4). You can create new docker release without cluster being down.
+Release new version of application without a downtime.
+
+```bash
+kubectl get rs -o wide
+# deploy new version with wrong image name
+kubectl set image deployment hello-world-rest-api hello-world-rest-api=DUMMY_IMAGE:TEST
+# will be 2 replicaset
+kubectl get rs -o wide
+kubectl get pods  # one POD has InvalidImageName
+# debug failed pod 
+kubectl describe pod hello-world-rest-api-84d8799896-tml7w
+kubectl get events --sort-by=.metadata.creationTimestamp
+# deploy new version with proper image
+# check http://35.188.132.193:8080/hello-world - should be V2
+kubectl set image deployment hello-world-rest-api hello-world-rest-api=in28min/hello-world-rest-api:0.0.2.RELEASE
+kubectl get pods
+kubectl get rs 
+# check background events
+kubectl get events --sort-by=.metadata.creationTimestamp -o wide
+```
+
