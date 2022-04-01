@@ -92,6 +92,8 @@ kubectl get events --sort-by=.metadata.creationTimestamp
 Ensure that specific number of PODs run all the time. If one POD is down, it will create a new POD.
 It is all about maintaining the number of PODs.
 
+POD is a wrapper of a set of containers, has an ip address. 
+
 POD is where your containers run, provides a grouping of containers. Replicaset ensures that a N of PODs are always running.
 
 Help:
@@ -113,8 +115,10 @@ kubectl get pods
 
 ## Deployment
 
-Deployment -> Replicaset1 (POD1 and POD2) and Replicase2 (POD3 and POD4). You can create new docker release without cluster being down.
-Release new version of application without a downtime.
+Deployment is a set of Replicaset1 (POD1 and POD2) and Replicase2 (POD3 and POD4). 
+You can create new docker release without cluster being down.
+Release new version of application without a downtime. 
+Ensure that new release happens without a delay.
 
 ```bash
 kubectl get rs -o wide
@@ -134,4 +138,26 @@ kubectl get rs
 # check background events
 kubectl get events --sort-by=.metadata.creationTimestamp -o wide
 ```
+
+## Service 
+
+Service allows your app to receive traffic via permanent ip address. Service is created when we do expose deployment.
+
+Go to service and ingress and check services.
+
+Load balances is a service which is created for us.
+
+Kubernetes service is running as a cluster ip service. Cluster service can only be accessed inside the cluster.
+
+```bash
+# every pod has ip address
+kubectl get pods -o wide
+kubectl delete pod hello-world-rest-api-7ddff5dfc6-btv2p
+kubectl get services  # will show load balancer and cluster ip
+```
+
+## Google cloud engine
+
+Go to `Workload` to see deployments, you can scale, edit, roll update of deployments. 
+You can check release history, details, events, see YAML config etc.
 
