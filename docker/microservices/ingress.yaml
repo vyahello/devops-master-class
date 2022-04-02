@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: gateway-ingress
+  annotations:
+    # redirect url as it is
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      # you can route to multiple services
+      # if you create a new deployment, you just create a new path here.
+      paths:
+      - path: /currency-exchange/*  # /currency-exchange/from/EUR/to/INR
+        backend:
+          serviceName: currency-exchange
+          servicePort: 8000
+      - path: /currency-conversion/*  # /currency-conversion/from/EUR/to/INR/quantity/10
+        backend:
+          serviceName: currency-conversion
+          servicePort: 8100

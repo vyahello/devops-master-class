@@ -197,6 +197,8 @@ K8S can run not only docker containers.
 
 If master goes down, app will run anyway.
 
+Node is virtual server where your POD is running.
+
 ```bash
 kubectl get componentstatuses  # check all components
 NAME                 STATUS    MESSAGE             ERROR
@@ -384,3 +386,25 @@ kubectl describe configMaps currency-conversion-config-map
 kubectl apply -f deployment.yaml
 kubectl logs currency-conversion-c5697fbd8-rvfd9
 ```
+
+## Kubernetes ingress 
+
+Change `type: NodePort`
+
+```bash
+cd 01-currency-exchange-microservice-basic/config/k8s
+kubectl apply -f deployment.yaml
+cd 02-currency-conversion-microservice-basic/config/k8s
+kubectl apply -f deployment.yaml
+# now both types are NodePort
+kubectl get svc
+# create ingress 
+kubectl apply -f ingress.yaml
+```
+
+Ingress - maps income requests to specific url pattern. Request first goes to ingress, ingress looks for url pattern. 
+More info check in `load balancing` section (there is 34.111.249.71:80 address).
+
+Note - one ip is used for 2 services and port is not required:
+  - http://34.111.249.71//currency-exchange/from/EUR/to/INR
+  - http://34.111.249.71/currency-conversion/from/EUR/to/INR/quantity/10
