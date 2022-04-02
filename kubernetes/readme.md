@@ -79,6 +79,7 @@ kubectl describe pod hello-world-rest-api-687d9c7bc7-2722m
 Delete POD
 ```bash
 kubectl get pods,services,deployments,jobs
+kubectl delete deployment hello-world-rest-api
 kubectl delete -n default deployment hello-world-rest-api
 kubectl delete -n default deployment.apps/fast-weather
 kubectl get replicaset  # DESIRED = 3
@@ -142,6 +143,11 @@ kubectl get rs
 kubectl get events --sort-by=.metadata.creationTimestamp -o wide
 # get deployment YAML config 
 kubectl get deployment hello-world-rest-api -o yaml
+```
+
+Delete deployment
+```bash
+kubectl delete deployment hello-world-rest-api
 ```
 
 ## Service 
@@ -283,4 +289,49 @@ kubectl delete all -l app=hello-world-rest-api
 kubectl apply -f deployment.yaml  # kind: ReplicaSet
 kubectl get svc --watch
 curl http://34.132.238.93:8080/hello-world
+```
+
+## Multiple deployments with one service
+
+Add two deployments with different version (version: v1 or v2) in deployment.yaml
+
+```bash
+# two deployments are created
+kubectl apply -f deployment.yaml
+kubectl get all  # 2 deployments, 2 replicas, 4 pods
+watch curl http://34.132.238.93:8080/hello-world  # will be 2 versions with different pods
+# add "version: v1" in "selector" to send traffic to v1 deployment
+kubectl apply -f deployment.yaml
+```
+
+## Top node and POD commands 
+
+```bash
+kubectl get pods --all-namespaces -l app=hello-world-rest-api
+# all services
+kubectl get services --all-namespaces
+# sort by type in deployment.yaml file
+get services --all-namespaces --sort-by=.spec.type 
+# cluster info 
+kubectl cluster-info
+# debug cluster
+kubectl cluster-info dump
+# how much cpu is used in node
+kubectl top node
+# how much cpu is used in pod
+# shortcut
+kubectl top pod
+kubectl get svc  # services
+kubectl get ev  # events
+kubectl get rs  # replicas
+kubectl get ns  # namespaces
+kubectl get no  # nodes
+kubectl get po  # pods
+```
+
+## Delete all pods and services 
+
+```bash
+kubectl delete all -l app=hello-world-rest-api
+kubectl get all
 ```
