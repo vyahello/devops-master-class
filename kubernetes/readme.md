@@ -86,6 +86,8 @@ kubectl get replicaset  # DESIRED = 3
 kubectl get events
 # sort by time
 kubectl get events --sort-by=.metadata.creationTimestamp
+# delete all deployment and replicaset
+kubectl delete all -l app=hello-world-rest-api 
 ```
 
 ## Replicaset 
@@ -236,4 +238,36 @@ kubectl rollout undo deployment hello-world-rest-api --to-revision=1
 curl http://35.188.132.193:8080/hello-world
 # check logs of a POD, same as docker logs and image ID
 kubectl logs hello-world-rest-api-687d9c7bc7-5vrf6
+```
+
+## YAML 
+
+Kubernetes is declarative - you can define steps in YAML file.
+
+```bash
+kubectl get deployment hello-world-rest-api
+kubectl get deployment hello-world-rest-api -o yaml
+# store deployment to yaml
+kubectl get deployment hello-world-rest-api -o yaml > deployment.yaml
+# store service to yaml
+kubectl get service hello-world-rest-api -o yaml > service.yaml 
+# update yaml file and apply 
+kubectl apply -f deployment.yaml  # change to 2 replicas
+kubectl get pods  # only 2 PODS
+# delete deployment and replicas
+kubectl get all -o wide
+kubectl delete all -l app=hello-world-rest-api 
+# build deployment from scratch
+kubectl apply -f deployment.yaml
+# new pods are created
+kubectl get pods
+# see interactively
+kubectl get service --watch
+# same as service
+kubectl get svc --watch
+# run cmd every 2 secs interactively
+watch curl http://35.188.132.193:8080/hello-world
+# see changes in deployment yaml
+kubectl diff -f deployment.yaml  # change to 3 replicas
+kubectl apply -f deployment.yaml
 ```
