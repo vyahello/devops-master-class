@@ -271,3 +271,16 @@ watch curl http://35.188.132.193:8080/hello-world
 kubectl diff -f deployment.yaml  # change to 3 replicas
 kubectl apply -f deployment.yaml
 ```
+
+## Create replicaset 
+
+Use `kind: ReplicaSet` in YAML file. Replicaset cannot handle releases. If you change `image` nothing will happen.
+
+If you need a release, use deployment.
+
+```bash
+kubectl delete all -l app=hello-world-rest-api
+kubectl apply -f deployment.yaml  # kind: ReplicaSet
+kubectl get svc --watch
+curl http://34.132.238.93:8080/hello-world
+```

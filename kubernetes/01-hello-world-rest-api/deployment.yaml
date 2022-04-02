@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: Deployment  # type, could be also Service
+kind: ReplicaSet  # type, could be Deployment, Service, ReplicaSet
 # info about deployment
 metadata:
   labels:
@@ -12,11 +12,11 @@ spec:
   selector:  # how pod is mapped to a deployment
     matchLabels:
       app: hello-world-rest-api
-  strategy:
-    rollingUpdate:
-      maxSurge: 25%  # how many instances to create each time
-      maxUnavailable: 25%
-    type: RollingUpdate
+#  strategy:
+#    rollingUpdate:
+#      maxSurge: 25%  # how many instances to create each time
+#      maxUnavailable: 25%
+#    type: RollingUpdate
   template:
     metadata:
       labels:
@@ -38,7 +38,7 @@ metadata:
   namespace: default
 spec:
   ports:
-  - nodePort: 31178
+  - nodePort: 31179
     port: 8080
     protocol: TCP
     targetPort: 8080
