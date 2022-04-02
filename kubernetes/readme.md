@@ -335,3 +335,52 @@ kubectl get po  # pods
 kubectl delete all -l app=hello-world-rest-api
 kubectl get all
 ```
+
+## Run microservices in k8s
+
+```bash
+cd 01-currency-exchange-microservice-basic/config/k8s
+kubectl apply -f deployment.yaml
+cd 02-currency-conversion-microservice-basic/config/k8s
+kubectl apply -f deployment.yaml
+kubectl get svc --watch
+# 1 exchange container and 2 conversion containers, check ip addresses and ports
+kubectl get pods
+```
+
+Containers already shared same network cuz `CURRENCY_EXCHANGE_SERVICE_HOST - 10.100.14.185` is set within k8s:
+- http://34.132.238.93:8000/currency-exchange/from/EUR/to/INR
+- http://104.198.225.20:8100/currency-conversion/from/EUR/to/INR/quantity/10
+
+Also, there is `env` key in deployment.yaml - `name: CURRENCY_EXCHANGE_SERVICE_HOST`.
+
+```bash
+kubectl logs currency-conversion-5b8c4cb8d5-f6dpb
+kubectl get svc  # there is 'currency-exchange' name so CURRENCY_EXCHANGE_SERVICE_HOST is set as a var automatically.
+# check 'CURRENCY_EXCHANGE_SERVICE_HOST - http://currency-exchange'
+```
+
+If we have 2 separate microservices then we need 2 deployments with 2 different services. 
+
+If we have 2 container versions are then we can create 2 deployments with same service.
+
+## Microservices centralized config with ConfigMaps
+
+Microservices Envs: 
+ - Dev: Dev1 
+ - QA: QA1, QA2
+ - Stage: Stage1 
+ - Prod: Prod1, Prod2, Prod3, Prod4
+
+Centralized configuration is useful for multiple environments via ConfigMaps.
+
+```bash
+kubectl apply -f 00-configmap.yaml
+kubectl get configMaps
+kubectl describe configMaps
+kubectl describe configMaps currency-conversion-config-map
+# in deployment.yaml uncomment 'valueFrom' to pick up value from configMap
+# comment 'value' and uncomment 'valueFrom'
+kubectl apply -f deployment.yaml
+kubectl logs currency-conversion-c5697fbd8-rvfd9
+```
