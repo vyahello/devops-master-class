@@ -1,4 +1,4 @@
-## IAAC 
+# IAAC 
 
 Manual provisioning app: provision server, install java, install tomcat, configure tomcat, deploy app. Difficult to maintain.
 
@@ -16,9 +16,11 @@ Once you provisioned a server you want to configure a software via config manage
 
 You use `terraform` to provision 1k servers on a cloud and `ansible` to configure all the software on servers.
 
-## Terraform
+# Terraform
 
 Terraform - IAAC tool. Terraform is used to provision resources on the cloud (load balancers, storage, db, server provision).
+
+Provision resources in the cloud from declarative code.
 
 Install terraform via https://learn.hashicorp.com/tutorials/terraform/install-cli.
 
@@ -28,3 +30,22 @@ brew install hashicorp/tap/terraform
 brew update
 brew upgrade hashicorp/tap/terraform
 ```
+
+## Create terraform project 
+
+Create `main.tf` file with `provider` option:
+```terraform
+provider "aws" {
+    region = "us-east-1"
+    version = "~>2.46"
+}
+```
+
+Execute:
+```bash
+terraform init
+```
+
+## Create AWS IAC user access 
+
+

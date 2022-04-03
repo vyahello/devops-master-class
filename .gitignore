@@ -32,3 +32,6 @@ build/
 
 # db
 *.sqlite
+
+# terraform
+.terraform*
