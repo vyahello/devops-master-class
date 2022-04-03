@@ -260,3 +260,41 @@ terraform show
 ```
 
 ## Variables in terraform
+
+```bash
+variable "iam_user_name_prefix" {
+  default =  "my_iam_user"
+}
+```
+
+```bash
+terraform apply -refresh=false
+terraform console
+> var.iam_user_name_prefix
+"my_iam_user"
+```
+
+```bash
+export TF_VAR_iam_user_name_prefix=FROM_ENV_VARIABLE_IAM_PREFIX
+terraform plan -refresh=false
+```
+
+Or create `terraform.tfvars`
+
+```terraform
+iam_user_name_prefix="VALUE_FROM_TERRAFORM_TFVARS"
+```
+
+Or via command line
+
+```bash
+# plan is just planning changes
+terraform plan -refresh=false -var="iam_user_name_prefix=VALUE_FROM_COMMAND_LINE"
+```
+
+Or 
+
+```bash
+# apply is used to make changes
+terraform apply -var-file="some-name.tfvars"
+```
