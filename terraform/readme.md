@@ -115,15 +115,75 @@ tolist([
 true
 ```
 
-## Outputs 
+### Outputs 
 
 Print outputs after "terraform apply" execution.
 
-```bash
+```terraform
 # main.tf
 output "s3_bucket_versioning" {
   value = aws_s3_bucket.s3_bucket.versioning[0].enabled
 }
+```
 
+```bash
 terraform apply -refresh=false
 ```
+
+## Create IAM user with terraform
+
+```terraform
+resource "aws_iam_user" "my_iam_user" {
+    name = "my_iam_user_abc"
+}
+```
+
+```bash
+terraform plan -out iam.tfplan
+terraform apply "iam.tfplan"
+```
+
+```terraform
+output "iam_user_complete_details" {
+  value = aws_iam_user.my_iam_user
+}
+```
+
+```bash
+terraform apply -refresh=false
+terraform console
+> aws_iam_user.my_iam_user.arn
+"arn:aws:iam::804278070838:user/my_iam_user_abc"
+```
+
+Update user name
+
+```terraform
+# create iam user
+resource "aws_iam_user" "my_iam_user" {
+    name = "my_iam_user_updated"
+}
+```
+
+```bash
+# update only this resource
+terraform apply -target="aws_iam_user.my_iam_user"
+```
+
+## Tfstate file
+
+Without this file terraform cannot identify known state and refresh actual values from the cloud.
+
+You should not do changes in .tfstate file directly. Terraform state should not be shared, due to sensitive info.
+
+Remote backend (s3) is the best option to store the state.
+
+`terraform.tfstate.backup` acts as a backup if `terraform.tfstate` gets corrupted.
+
+If you have multiple people in the project you need to share state with them.
+Don't commit `terraform.tfstate` files due to sensitive info.
+
+We can store terraform tfstate in s3 bucket.
+
+If you delete tfstate files and execute `terraform apply`, terraform will create new resource again.
+
