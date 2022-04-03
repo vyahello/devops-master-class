@@ -18,6 +18,8 @@ You use `terraform` to provision 1k servers on a cloud and `ansible` to configur
 
 # Terraform
 
+https://www.terraform.io/language
+
 Terraform - IAAC tool. Terraform is used to provision resources on the cloud (load balancers, storage, db, server provision).
 
 Provision resources in the cloud from declarative code.
@@ -48,4 +50,29 @@ terraform init
 
 ## Create AWS IAC user access 
 
+Create user via https://us-east-1.console.aws.amazon.com and give admin access.
 
+## Create terraform env vars 
+
+```bash
+export AWS_ACCESS_KEY_ID=XXXX
+export AWS_SECRET_ACCESS_KEY=XXXX
+```
+
+## Create S3 bucket
+
+S3 (Simple storage service) bucket could be created via WEB https://s3.console.aws.amazon.com/s3
+
+S3 bucket could be also created via CLI.
+
+- Create `resource` in main.tf file
+- Create s3 bucket via terraform:
+  ```bash
+  terraform plan 
+
+  terraform apply  # execute, create s3 bucket
+  aws_s3_bucket.s3_bucket: Creating...
+  aws_s3_bucket.s3_bucket: Still creating... [10s elapsed]
+  aws_s3_bucket.s3_bucket: Creation complete after 12s [id=s3-bucket-28min]
+  ```
+- Go to S3 WEB and check the bucket list
