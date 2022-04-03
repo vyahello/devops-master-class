@@ -51,4 +51,4 @@ spec:
   selector:
     app: currency-conversion
   sessionAffinity: None #CHANGE
-  type: NodePort  # could be also NodePort
+  type: NodePort  # NodePort work with ingress, change it to LoadBalancer by default
