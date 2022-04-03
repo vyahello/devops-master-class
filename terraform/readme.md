@@ -79,9 +79,9 @@ S3 bucket could be also created via CLI.
 
 ## States
 
-- Desired state: I want s3 bucket with 5 virtual servers, I want this state in cloud. What I want to be created in cloud based on `main.tf` file`.
-- Known: result of previous execution (stores in .tfstate file). What is present is in .tfstate file (result of previous execution).
-- Actual: whatever this state in bucket. What is actually present in AWS. 
+- Desired state: I want s3 bucket with 5 virtual servers, I want this state in cloud. What I want to be created in cloud based on `main.tf` config file`.
+- Known: result of previous execution (stores in .tfstate files). What is present is in .tfstate files (result of previous execution).
+- Actual: whatever this state in bucket (in the cloud). What is actually present in AWS. 
 
 When we do terraform apply - it looks in tfstate and in AWS and check if we have changes, compares desired state to actual state.
 
@@ -187,3 +187,76 @@ We can store terraform tfstate in s3 bucket.
 
 If you delete tfstate files and execute `terraform apply`, terraform will create new resource again.
 
+### Split tf file into separate files
+
+You can have tons of .tf files with no specific name, they will be concatenated together.
+
+Create `outputs.tf` file:
+
+```bash
+# outputs.tf
+output "s3_bucket_versioning" {
+  value = aws_s3_bucket.s3_bucket.versioning[0].enabled
+}
+output "s3_bucket_complete_details" {
+  value = aws_s3_bucket.s3_bucket
+}
+output "iam_user_complete_details" {
+  value = aws_iam_user.my_iam_user
+}
+```
+
+Destroy all the resources (iam user and s3 bucket):
+```bash
+terraform destroy
+
+aws_iam_user.my_iam_user: Destroying... [id=my_iam_user_updated]
+aws_s3_bucket.s3_bucket: Destroying... [id=s3-bucket-28min-01]
+aws_s3_bucket.s3_bucket: Destruction complete after 1s
+aws_iam_user.my_iam_user: Destruction complete after 2s
+```
+
+## Create multiple users
+
+https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_user
+
+```terraform
+resource "aws_iam_user" "my_iam_user" {
+    count = 2
+    name = "my_iam_user__${count.index}"
+}
+```
+
+```bash
+cd terraform/02-basics
+terraform init
+terraform apply
+```
+
+change `count = 3`
+```bash
+terraform apply
+```
+
+Go to https://us-east-1.console.aws.amazon.com/iamv2/home#/users to check users
+
+## Terraform commands 
+
+https://www.terraform.io/cli/commands/apply
+
+```bash
+terraform console
+> aws_iam_user.my_iam_user[1]
+...
+```
+
+```bash
+# validate .tf files
+terraform validate
+# format file (with 2 spaces) such as 'black'
+terraform fmt
+# provides human-readable output of a current state
+terraform show
+```
+
+## Variables in terraform

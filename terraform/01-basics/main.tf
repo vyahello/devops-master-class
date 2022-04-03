@@ -16,25 +16,29 @@ provider "aws" {
 # object you want to manage in a cloud
 # second name is internal s3 name
 # plan
-resource "aws_s3_bucket" "s3_bucket" {
-    bucket = "s3-bucket-28min-01"  # bucket name
-  versioning {
-    enabled = true
-  }
-}
-
-# create iam user
-resource "aws_iam_user" "my_iam_user" {
-    name = "my_iam_user_updated"
-}
+#resource "aws_s3_bucket" "s3_bucket" {
+#    bucket = "s3-bucket-28min-01"  # bucket name
+#  versioning {
+#    enabled = true
+#  }
+#}
+#
+## create iam user
+#resource "aws_iam_user" "my_iam_user" {
+#    name = "my_iam_user_updated"
+#}
 
 # show output after "terraform apply" cmd
-output "s3_bucket_versioning" {
-  value = aws_s3_bucket.s3_bucket.versioning[0].enabled
-}
-output "s3_bucket_complete_details" {
-  value = aws_s3_bucket.s3_bucket
-}
-output "iam_user_complete_details" {
-  value = aws_iam_user.my_iam_user
-}
+#output "s3_bucket_versioning" {
+#  value = aws_s3_bucket.s3_bucket.versioning[0].enabled
+#}
+#output "s3_bucket_complete_details" {
+#  value = aws_s3_bucket.s3_bucket
+#}
+#output "iam_user_complete_details" {
+#  value = aws_iam_user.my_iam_user
+#}
+
+
+
+
