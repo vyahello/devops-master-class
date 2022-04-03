@@ -17,5 +17,16 @@ provider "aws" {
 # second name is internal s3 name
 # plan
 resource "aws_s3_bucket" "s3_bucket" {
-    bucket = "s3-bucket-28min"  # bucket name
+    bucket = "s3-bucket-28min-01"  # bucket name
+  versioning {
+    enabled = true
+  }
+}
+
+# show output after "terraform apply" cmd
+output "s3_bucket_versioning" {
+  value = aws_s3_bucket.s3_bucket.versioning[0].enabled
+}
+output "s3_bucket_complete_details" {
+  value = aws_s3_bucket.s3_bucket
 }

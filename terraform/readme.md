@@ -76,3 +76,54 @@ S3 bucket could be also created via CLI.
   aws_s3_bucket.s3_bucket: Creation complete after 12s [id=s3-bucket-28min]
   ```
 - Go to S3 WEB and check the bucket list
+
+## States
+
+- Desired state: I want s3 bucket with 5 virtual servers, I want this state in cloud. What I want to be created in cloud based on `main.tf` file`.
+- Known: result of previous execution (stores in .tfstate file). What is present is in .tfstate file (result of previous execution).
+- Actual: whatever this state in bucket. What is actually present in AWS. 
+
+When we do terraform apply - it looks in tfstate and in AWS and check if we have changes, compares desired state to actual state.
+
+Change S3 bucket name and execute `terraform apply`. It will delete old and create a new bucket name.
+
+```bash
+# add "versioning {enabled=true}" in terraform.tfstate file
+terraform apply
+```
+
+## Console 
+
+```bash
+terraform console
+> aws_s3_bucket.s3_bucket  # name of resource in main.tf file object_type.object_name
+...
+
+> aws_s3_bucket.s3_bucket.versioning
+tolist([
+  {
+    "enabled" = true
+    "mfa_delete" = false
+  },
+])
+> aws_s3_bucket.s3_bucket.versioning[0]
+{
+  "enabled" = true
+  "mfa_delete" = false
+}
+> aws_s3_bucket.s3_bucket.versioning[0].enabled
+true
+```
+
+## Outputs 
+
+Print outputs after "terraform apply" execution.
+
+```bash
+# main.tf
+output "s3_bucket_versioning" {
+  value = aws_s3_bucket.s3_bucket.versioning[0].enabled
+}
+
+terraform apply -refresh=false
+```
