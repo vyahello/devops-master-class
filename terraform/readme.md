@@ -505,3 +505,28 @@ terraform fmt
 terraform destroy
 Destroy complete! Resources: 3 destroyed.
 ```
+
+## Create EC2 instance
+
+EC2 - virtual servers in the cloud. VE server - servers in the cloud. In AWS VE servers called EC2 (elastic compute cloud).
+
+Create EC2 via UI:
+  - Step 1: Choose an Amazon Machine Image (AMI) - ami-0c02fb55956c7d316
+  - Step 2: Choose an Instance Type (cpu, ram, hardware) - t2.micro
+  - Step 3: Configure Instance Details
+    - VPC (virtual private cloud) - private network in AWS cloud, you can create subnets here. If you dont want share access with resource - put it into private zone, otherwise use public zone.
+    - Network - vpc-06cf03e95b6877090 (default)
+  - Next -> Next
+  - Step 6: Configure Security Group - launch-wizard-1. Control traffic to your EC2 instance. Allow SSH, HTTP/HTTPS
+
+https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group
+
+Create EC2 via CMD:
+  - check `05-ec2-instances/main.tf` file
+  - ```bash
+    terraform fmt
+    terraform validate
+    terraform apply
+    ```
+
+Check https://us-east-1.console.aws.amazon.com/vpc/home?region=us-east-1#securityGroups
