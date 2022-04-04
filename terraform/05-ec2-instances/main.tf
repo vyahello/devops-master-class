@@ -1,7 +1,3 @@
-variable "aws_key_pair" {
-  default = " ~/aws/aws_keys/default-ec2.cer"
-}
-
 # Configure the AWS Provider
 provider "aws" {
   region = "us-west-2"
@@ -12,24 +8,6 @@ provider "aws" {
 resource "aws_default_vpc" "default" {
 
 }
-
-data "aws_subnet_ids" "default_subnets" {
-  vpc_id = aws_default_vpc.default.id
-}
-
-data "aws_ami" "aws_linux_2_latest" {
-  most_recent = true
-  owners      = ["amazon"]
-  filter {
-    name   = "name"
-    values = ["amzn2-ami-hvm-*"]
-  }
-}
-
-data "aws_ami_ids" "aws_linux_2_latest_ids" {
-  owners = ["amazon"]
-}
-
 
 // HTTP Server -> Security Group
 // Security Group -> 80 TCP, 22 TCP, CIDR ["0.0.0.0/0"]

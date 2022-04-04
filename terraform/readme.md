@@ -708,3 +708,25 @@ terraform console
 > data.aws_ami.aws_linux_2_latest 
 ```
 
+## Terraform graph 
+
+Shows graph of resources present in our configuration
+
+Search for graphviz online and debug - https://dreampuf.github.io/GraphvizOnline.
+
+```terraform
+digraph {
+  compound = "true"
+  newrank = "true"
+  subgraph "root" {
+  }
+}
+```
+
+```bash
+terraform destroy
+```
+
+## Create multiple EC2 instances with load balancer
+
+
