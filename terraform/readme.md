@@ -640,7 +640,7 @@ terraform apply -refresh=false
 
 ```terraform
 data "aws_subnet_ids" "default_subnets" {
-  vpc_id = aws_default_vpc.default_vpc.id
+  vpc_id = aws_default_vpc.default.id
 }
 ```
 
@@ -676,3 +676,35 @@ resource "aws_instance" "http_server" {
 ```bash
 terraform apply -refresh=false
 ```
+
+
+### Add AMI with data providers 
+
+```terraform
+data "aws_ami" "aws_linux_2_latest" {
+  most_recent = true
+  owners      = ["amazon"]
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-*"]
+  }
+}
+
+data "aws_ami_ids" "aws_linux_2_latest_ids" {
+  owners = ["amazon"]
+}
+```
+
+Apply changes
+```bash
+terraform apply -target=data.aws_ami.aws_linux_2_latest
+terraform apply -target=data.aws_ami_ids.aws_linux_2_latest_ids
+```
+
+```bash
+terraform console 
+> data.aws_ami_ids.aws_linux_2_latest_ids
+...
+> data.aws_ami.aws_linux_2_latest 
+```
+
