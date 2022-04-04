@@ -79,6 +79,8 @@ S3 bucket could be also created via CLI.
 
 ## States
 
+https://www.terraform.io/language/state
+
 - Desired state: I want s3 bucket with 5 virtual servers, I want this state in cloud. What I want to be created in cloud based on `main.tf` config file`.
 - Known: result of previous execution (stores in .tfstate files). What is present is in .tfstate files (result of previous execution).
 - Actual: whatever this state in bucket (in the cloud). What is actually present in AWS. 
@@ -114,6 +116,10 @@ tolist([
 > aws_s3_bucket.s3_bucket.versioning[0].enabled
 true
 ```
+
+Terraform state is known state - terraform.tfstate. Desired state - declared in .tf files, actual state - resources present in a cloud (AWS).
+
+https://www.terraform.io/language/state
 
 ### Outputs 
 
@@ -297,4 +303,205 @@ Or
 ```bash
 # apply is used to make changes
 terraform apply -var-file="some-name.tfvars"
+```
+
+## Lists and Sets
+
+```terraform
+variable "names" {
+  default = ["tom", "sam", "jane"]
+}
+
+# Configure the AWS Provider
+provider "aws" {
+  region = "us-east-1"
+  # VERSION IS NOT NEEDED HERE
+}
+
+# create iam users
+resource "aws_iam_user" "my_iam_user" {
+  count = length(var.names)
+  name  = var.names[count.index]
+}
+```
+
+https://www.terraform.io/language/functions/list
+
+```bash
+terraform init
+terraform apply
+terraform console
+> var.names
+[
+  "tom",
+  "sam",
+  "jane",
+]
+> var.names[0]
+"tom"
+> length(var.names)
+3
+> reverse(var.names)
+[
+  "jane",
+  "sam",
+  "tom",
+]
+> concat(var.names, ["new"])
+[
+  "tom",
+  "sam",
+  "jane",
+  "new",
+]
+> contains(var.names, "ravi")
+false
+> sort(var.names)
+tolist([
+  "jane",
+  "sam",
+  "tom",
+])
+> range(3)
+tolist([
+  0,
+  1,
+  2,
+])
+```
+
+Delete users 
+
+```bash
+terraform destroy -refresh=false
+```
+
+
+```terraform
+resource "aws_iam_user" "my_iam_user" {
+#  count = length(var.names)
+#  name  = var.names[count.index]
+  for_each = toset(var.names)
+  name = each.value
+}
+```
+
+Add "tom" user
+```bash
+terraform apply
+Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
+# check terraform.tfstate file
+```
+
+Remove "tom" user
+```bash
+terraform apply
+apply complete! Resources: 0 added, 0 changed, 1 destroyed.
+# check terraform.tfstate file
+```
+
+## Maps
+
+
+```terraform
+variable "names" {
+  default = {
+    tom: "NL" ,
+    sam: "US",
+    jane: "UK"
+  }
+}
+```
+
+```terraform
+terraform console
+> var.names
+{
+  "jane" = "UK"
+  "sam" = "US"
+  "tom" = "NL"
+}
+> var.names["jane"]
+"UK"
+> keys(var.names)
+[
+  "jane",
+  "sam",
+  "tom",
+]
+> values(var.names)
+[
+  "UK",
+  "US",
+  "NL",
+]
+> lookup(var.names, "sam")
+"US"
+> lookup(var.names, "sa", "default")
+"default"
+```
+
+```terraform
+# create iam users
+resource "aws_iam_user" "my_iam_user" {
+  for_each = var.names
+  name = each.key
+  tags = {
+    country: each.value
+  }
+}
+```
+
+```bash
+terraform apply
+Apply complete! Resources: 3 added, 0 changed, 0 destroyed.
+```
+
+```terraform
+variable "names" {
+  default = {
+    tom: {country: "NL"},
+    sam: {country: "US"},
+    jane: {country: "UK"}
+  }
+}
+
+resource "aws_iam_user" "my_iam_user" {
+  for_each = var.names
+  name = each.key
+  tags = {
+#    country: each.value
+    country: each.value.country
+  }
+}
+```
+
+```bash
+terraform apply -refresh=false
+```
+
+```terraform
+variable "names" {
+  default = {
+    tom: {country: "NL", dep: "ABC"},
+  }
+}
+
+# create iam users
+resource "aws_iam_user" "my_iam_user" {
+  for_each = var.names
+  name = each.key
+  tags = {
+#    country: each.value
+    country: each.value.country
+    dep: each.value.dep
+  }
+}
+```
+
+```bash
+terraform apply -refresh=false
+terraform fmt
+terraform destroy
+Destroy complete! Resources: 3 destroyed.
 ```
