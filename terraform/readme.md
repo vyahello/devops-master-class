@@ -729,4 +729,26 @@ terraform destroy
 
 ## Create multiple EC2 instances with load balancer
 
+Refer to `06-ec2-with-elb` folder.
 
+Create one instance for each of subnets
+```terraform
+resource "aws_instance" "http_server" {
+  ami                    = "ami-00ee4df451840fa9d"
+  key_name               = "default-ec2"
+  instance_type          = "t2.micro"
+  vpc_security_group_ids = [aws_security_group.http_server_sg.id]
+  # logic is disabled here
+  for_each               = data.aws_subnet_ids.default_subnets.ids
+  subnet_id              = each.value
+  tags                   = {
+    name : "http_servers_${each.value}"
+  }
+}
+```
+
+```bash
+terraform init
+terraform apply
+terraform apply -target=data.aws_subnet_ids.default_subnets
+```
