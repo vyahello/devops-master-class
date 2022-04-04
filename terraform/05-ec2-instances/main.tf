@@ -7,11 +7,22 @@ provider "aws" {
   region = "us-west-2"
 }
 
+// provides a resource to manage default AWS VPC in the current region
+// https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/default_vpc
+resource "aws_default_vpc" "default" {
+
+}
+
+data "aws_subnet_ids" "default_subnets" {
+  vpc_id = aws_default_vpc.default_vpc.id
+}
+
 // HTTP Server -> Security Group
 // Security Group -> 80 TCP, 22 TCP, CIDR ["0.0.0.0/0"]
 resource "aws_security_group" "http_server_sg" {
-  name   = "http_server_sg"
-  vpc_id = "vpc-02d3805b90db6e3f0"
+  name = "http_server_sg"
+  #  vpc_id = "vpc-02d3805b90db6e3f0"
+  vpc_id = aws_default_vpc.default.id
   // what can you inside this http server
   ingress {
     // allow traffic on 80 port from anywhere
@@ -49,7 +60,8 @@ resource "aws_instance" "http_server" {
   // taken from terraform.tfstate file
   vpc_security_group_ids = [aws_security_group.http_server_sg.id]
   # https://us-east-1.console.aws.amazon.com/vpc/home?region=us-east-1#subnets:
-  subnet_id = "subnet-039846e7279c1418e"
+  #  subnet_id = "subnet-039846e7279c1418e"
+  subnet_id = tolist(data.aws_subnet_ids.default_subnets.ids)[0]
 
   // connect to http server (ec2 instance)
   connection {

@@ -597,3 +597,82 @@ terraform console
 > aws_instance.http_server.public_dns
 (known after apply)
 ```
+
+```bash
+terraform destroy 
+terraform apply
+```
+
+## Immutable servers 
+
+When you use IAAC, you need to use immutable servers.
+
+### Add default VPC 
+
+https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/default_vpc
+
+```terraform
+resource "aws_default_vpc" "default" {}
+```
+
+```bash
+terraform apply -target=aws_default_vpc.default
+```
+
+```terraform
+resource "aws_security_group" "http_server_sg" {
+  name   = "http_server_sg"
+  #  vpc_id = "vpc-02d3805b90db6e3f0"
+  vpc_id = aws_default_vpc.default.id
+}
+```
+
+```bash
+terraform console 
+> aws_default_vpc.default
+vpc-02d3805b90db6e3f0
+# show all objects which are in state
+terraform show
+terraform apply -refresh=false
+```
+
+### Add subnet
+
+```terraform
+data "aws_subnet_ids" "default_subnets" {
+  vpc_id = aws_default_vpc.default_vpc.id
+}
+```
+
+Apply to only subnet changes
+```bash
+terraform apply -target=data.aws_subnet_ids.default_subnets
+terraform console
+> data.aws_subnet_ids.default_subnets
+{
+  "id" = "vpc-02d3805b90db6e3f0"
+  "ids" = [
+    "subnet-132323",
+    "subnet-abcdd2",
+  ]
+}
+> data.aws_subnet_ids.default_subnets.ids
+> tolist(data.aws_subnet_ids.default_subnets.ids)[0]
+```
+
+```terraform
+resource "aws_instance" "http_server" {
+  ami                    = "ami-00ee4df451840fa9d"
+  key_name               = "default-ec2"
+  instance_type          = "t2.micro"
+  // taken from terraform.tfstate file
+  vpc_security_group_ids = [aws_security_group.http_server_sg.id]
+  # https://us-east-1.console.aws.amazon.com/vpc/home?region=us-east-1#subnets:
+  # subnet_id = "subnet-039846e7279c1418e"
+  subnet_id              = tolist(data.aws_subnet_ids.default_subnets.ids)[0]
+}
+```
+
+```bash
+terraform apply -refresh=false
+```
