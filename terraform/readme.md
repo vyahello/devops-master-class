@@ -402,7 +402,6 @@ apply complete! Resources: 0 added, 0 changed, 1 destroyed.
 
 ## Maps
 
-
 ```terraform
 variable "names" {
   default = {
@@ -506,9 +505,12 @@ terraform destroy
 Destroy complete! Resources: 3 destroyed.
 ```
 
-## Create EC2 instance
+## EC2
 
 EC2 - virtual servers in the cloud. VE server - servers in the cloud. In AWS VE servers called EC2 (elastic compute cloud).
+
+
+### Create EC2 instance
 
 Create EC2 via UI:
   - Step 1: Choose an Amazon Machine Image (AMI) - ami-0c02fb55956c7d316
@@ -530,3 +532,68 @@ Create EC2 via CMD:
     ```
 
 Check https://us-east-1.console.aws.amazon.com/vpc/home?region=us-east-1#securityGroups
+
+### EC2 key pair 
+
+https://us-east-1.console.aws.amazon.com/ec2/v2/home?region=us-east-1#KeyPairs:
+
+```bash
+chmod 400 default-ec2.cer
+mkdir -p ~/aws/aws_keys
+mv default-ec2.cer ~/aws/aws_keys
+ls ~/aws/aws_keys
+```
+
+### Add EC2 config to terraform 
+
+Check `05-ec2-instances/main.tf` file (resource section)
+
+```bash
+terraform fmt
+terraform apply -refresh=false
+```
+
+### Install http server on EC2 instance
+
+Check `05-ec2-instances/main.tf` file (resource section)
+
+If you already created instance you can't change it. You need to unprovision (destroy) it and provision new instance.
+```terraform
+resource "aws_instance" "http_server" {
+  ami                    = "ami-0c02fb55956c7d316"
+  key_name               = "default-ec2"
+  instance_type          = "t2.micro"
+  // taken from terraform.tfstate file
+  vpc_security_group_ids = [aws_security_group.http_server_sg.id]
+  # https://us-east-1.console.aws.amazon.com/vpc/home?region=us-east-1#subnets:
+  subnet_id              = "subnet-039846e7279c1418e"
+
+  // connect to http server (ec2 instance)
+  connection {
+    type        = "ssh"
+    // current resource
+    host        = self.public_ip
+    // "ec2-user" is default user name
+    user        = "ec2-user"
+    private_key = file(var.aws_key_pair)
+  }
+
+  provisioner "remote-exec" {
+    // type commands inline and list commands here
+    inline = [
+      "sudo yum install httpd -y", // install httpd
+      "sudo service httpd start", // start server
+      "echo message | sudo tee /var/www/html/index.html" // copy a file
+    ]
+  }
+}
+```
+
+```bash
+terraform fmt
+terraform validate
+terraform apply
+terraform console
+> aws_instance.http_server.public_dns
+(known after apply)
+```
