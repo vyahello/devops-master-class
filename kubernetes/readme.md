@@ -341,9 +341,9 @@ kubectl get all
 ## Run microservices in k8s
 
 ```bash
-cd 01-currency-exchange-microservice-basic/config/k8s
+cd 01-currency-exchange
 kubectl apply -f deployment.yaml
-cd 02-currency-conversion-microservice-basic/config/k8s
+cd 02-currency-conversion
 kubectl apply -f deployment.yaml
 kubectl get svc --watch
 # 1 exchange container and 2 conversion containers, check ip addresses and ports
@@ -392,9 +392,9 @@ kubectl logs currency-conversion-c5697fbd8-rvfd9
 Change `type: NodePort`
 
 ```bash
-cd 01-currency-exchange-microservice-basic/config/k8s
+cd 01-currency-exchange
 kubectl apply -f deployment.yaml
-cd 02-currency-conversion-microservice-basic/config/k8s
+cd 02-currency-conversion
 kubectl apply -f deployment.yaml
 # now both types are NodePort
 kubectl get svc
