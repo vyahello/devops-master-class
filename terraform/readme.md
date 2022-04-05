@@ -960,4 +960,119 @@ terraform apply
 
 Check for tfstate file in S3 bucket via https://s3.console.aws.amazon.com/s3/buckets/dev-app-backend-state-3345?region=us-east-1&tab=objects
 
+### Create multiple envs using terraform workspaces 
 
+```bash
+terraform workspace show
+default 
+# create new workspace
+terraform workspace new prod-env
+terraform workspace show
+terraform init
+```
+
+```terraform
+resource "aws_iam_user" "my_iam_user" {
+  name = "${terraform.workspace}_my_iam_user_abc"
+}
+```
+
+```bash
+terraform plan 
+...
++ name                 = "prod-env_my_iam_user_abc"
+```
+
+```bash
+# switch workspace
+terraform workspace select default
+terraform plan
+```
+
+```bash
+terraform plan 
+...
+~ name          = "my_iam_user_abc" -> "default_my_iam_user_abc"
+```
+
+```bash
+terraform workspace list
+* default
+  prod-env
+ 
+terraform workspace select prod-env
+Switched to workspace "prod-env".
+
+terraform workspace show
+prod-env
+```
+
+### Create multiple envs using terraform modules 
+
+Refer to `08-modules`
+
+Modules used for .tf files flexibility.
+
+```terraform
+# terraform-modules/users/main.tf
+
+variable "environment" {
+  default = "default"
+}
+
+# Configure the AWS Provider
+provider "aws" {
+  region = "us-east-1"
+  version = "~> 2.46"
+}
+
+resource "aws_iam_user" "my_iam_user" {
+  name = "my_iam_user_abc_${var.environment}"
+}
+```
+
+```terraform
+# dev/users/main.tf
+
+module "user_module" {
+  source = "../../terraform-modules/users"
+  environment = "dev"
+}
+```
+
+```bash
+cd dev/users
+terraform init
+terraform plan
+ + name          = "my_iam_user_abc_dev"
+```
+
+
+```terraform
+# qa/users/main.tf
+
+module "user_module" {
+  source = "../../terraform-modules/users"
+  environment = "qa"
+}
+```
+
+```bash
+cd qa/users
+terraform init
+terraform plan
+ + name          = "my_iam_user_abc_qa"
+```
+
+
+Local variables 
+```terraform
+resource "aws_iam_user" "my_iam_user" {
+  name = "${local.iam_user_extension}_${var.environment}"
+}
+
+# local variables, no one can override this variable
+locals {
+  iam_user_extension = "my_iam_user_abc"
+}
+```
