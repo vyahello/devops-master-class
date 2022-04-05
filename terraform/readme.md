@@ -837,3 +837,127 @@ Destroy LB
 ```bash
 terraform destroy
 ```
+
+
+### Store remote state into S3 
+
+Refer to `07-backend-state` folder.
+
+```bash
+terraform init
+terraform apply
+
+Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
+
+Outputs:
+my_iam_user_complete_details = {
+  "arn" = "arn:aws:iam::708363104337:user/my_iam_user_abc"
+  "force_destroy" = false
+  "id" = "my_iam_user_abc"
+  "name" = "my_iam_user_abc"
+  "path" = "/"
+  "permissions_boundary" = tostring(null)
+  "tags" = tomap(null) /* of string */
+  "tags_all" = tomap({})
+  "unique_id" = "AIDA2J3N3GBIVIJHPZM4D"
+}
+```
+
+Actual state is set in `outputs.tf` file. 
+
+Create S3 bucket and DynamoDB for locking access to `.tfstate` file.
+
+```terraform
+provider "aws" {
+  region = "us-east-1"
+}
+
+
+// S3 bucket, store state in S3 bucket
+resource "aws_s3_bucket" "enterprise_backend_state" {
+  bucket = "dev-app-backend-state-3345"
+
+  // prevent deletion of bucker
+  lifecycle {
+    prevent_destroy = true
+  }
+  // store multiple versions of the state
+  versioning {
+    enabled = true
+  }
+
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        // which algo ewe want to use, AES - advanced encryption standard
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
+
+
+// Locking - you don't want the state to be corrupted, lock it, use Dynamo DB to lock state
+// DynamoDB table
+resource "aws_dynamodb_table" "enterprise_backend_lock" {
+  name = "dev_app_locks"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key = "LockID"
+  attribute {
+    name = "LockID"
+    type = "S"  # string
+
+  }
+}
+```
+
+```bash
+terraform init 
+terraform apply
+
+aws_s3_bucket.enterprise_backend_state: Creating...
+aws_dynamodb_table.enterprise_backend_lock: Creating...
+aws_s3_bucket.enterprise_backend_state: Still creating... [10s elapsed]
+aws_dynamodb_table.enterprise_backend_lock: Still creating... [10s elapsed]
+aws_s3_bucket.enterprise_backend_state: Creation complete after 10s [id=dev-app-backend-state-3345]
+aws_dynamodb_table.enterprise_backend_lock: Creation complete after 13s [id=dev_app_locks]
+
+Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
+```
+
+Check bucket via https://s3.console.aws.amazon.com/s3/buckets?region=us-east-1
+
+### Update user project to use S3 remote backend 
+
+```terraform
+variable app {
+  default = "07-backend-state"
+}
+
+variable project {
+  default = "users"
+}
+
+variable env {
+  default = "dev"
+}
+
+terraform {
+  backend "s3" {
+    bucket = "dev-app-backend-state-3345"
+    key = "${var.app}-${var.project}-${var.env}"
+    region = "us-east-1"
+    dynamodb_table = "dev_app_locks"
+    encrypt = true
+  }
+}
+```
+
+```bash
+terraform init
+terraform apply
+```
+
+Check for tfstate file in S3 bucket via https://s3.console.aws.amazon.com/s3/buckets/dev-app-backend-state-3345?region=us-east-1&tab=objects
+
+
