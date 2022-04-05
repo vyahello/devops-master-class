@@ -49,4 +49,7 @@ Go to https://dev.azure.com
 https://dev.azure.com/vjagello93/azure-devops-kuber-terra
 
 - Go to pipelines and select github repo 
-- Create YAML pipeline. In case pool issues configure self-hosted pool via https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/v2-osx?view=azure-devops
+- Create YAML pipeline. In case of pool issues you need to configure self-hosted pool via https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/v2-osx?view=azure-devops
+- Click run and commit the pipeline 
+- Check pipeline config: [azure-pipelines.yml](azure_devops_pipelines/azure-pipelines.yml)
+- Check job result via https://dev.azure.com/vjagello93/azure-devops-kuber-terra/_build
