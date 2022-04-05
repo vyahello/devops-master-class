@@ -24,6 +24,8 @@ Terraform - IAAC tool. Terraform is used to provision resources on the cloud (lo
 
 Provision resources in the cloud from declarative code.
 
+Terraform is used to create multiple virtual servers in cloud e.g AWS with specific resources (load balancers, storage, ingress/egress networks, subnets, http servers, VPC).
+
 Install terraform via https://learn.hashicorp.com/tutorials/terraform/install-cli.
 
 ```bash
@@ -509,6 +511,9 @@ Destroy complete! Resources: 3 destroyed.
 
 EC2 - virtual servers in the cloud. VE server - servers in the cloud. In AWS VE servers called EC2 (elastic compute cloud).
 
+EC2 can have VPC, security_groups, load balancers, ingress/egress network, launched http server.
+
+Terraform is used to create multiple virtual servers in cloud e.g AWS.
 
 ### Create EC2 instance
 
@@ -708,7 +713,7 @@ terraform console
 > data.aws_ami.aws_linux_2_latest 
 ```
 
-## Terraform graph 
+### Terraform graph 
 
 Shows graph of resources present in our configuration
 
@@ -727,14 +732,14 @@ digraph {
 terraform destroy
 ```
 
-## Create multiple EC2 instances with load balancer
+### Create multiple EC2 instances with load balancer
 
 Refer to `06-ec2-with-elb` folder.
 
 Create one instance for each of subnets
 ```terraform
 resource "aws_instance" "http_server" {
-  ami                    = "ami-00ee4df451840fa9d"
+  ami                    = data.aws_ami.aws_linux_2_latest.id
   key_name               = "default-ec2"
   instance_type          = "t2.micro"
   vpc_security_group_ids = [aws_security_group.http_server_sg.id]
@@ -749,6 +754,86 @@ resource "aws_instance" "http_server" {
 
 ```bash
 terraform init
-terraform apply
 terraform apply -target=data.aws_subnet_ids.default_subnets
+terraform apply
+```
+
+Check https://us-east-1.console.aws.amazon.com/ec2/v2/home?region=us-east-1#Instances - should be multiple ec2 instances.
+
+Check for public DNSs in terraform.tfstate file e.g - http://ec2-3-238-118-87.compute-1.amazonaws.com
+
+### Create SG and LB 
+
+```terraform
+resource "aws_security_group" "elb_sg" {
+  name = "elb_sg"
+  #  vpc_id = "vpc-02d3805b90db6e3f0"
+  vpc_id = aws_default_vpc.default.id
+  // what can you inside this http server
+  ingress {
+    // allow traffic on 80 port from anywhere
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    // allow traffic on 22 port from anywhere
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  // allow traffic from anywhere
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = -1 // all protocols
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_elb" "elb" {
+  name = "elb"
+  subnets = data.aws_subnet_ids.default_subnets.ids
+  security_groups = [aws_security_group.elb_sg.id]
+  # list of instances ids
+  instances = values(aws_instance.http_servers).*.id
+  listener {
+    instance_port = 80
+    instance_protocol = "http"
+    lb_port = 80
+    lb_protocol = "http"
+  }
+}
+```
+
+```bash
+terraform console
+> aws_instance.http_servers
+> value(aws_instance.http_servers)  # values in set format
+> values(aws_instance.http_servers).*.id
+[
+  "i-01260f8218dd246b7",
+  "i-0d7469edf5b7144f4",
+  "i-0a27c0b58514f81a6",
+  "i-0a135ea3ed7026d93",
+  "i-0b6366cd51a12d8d1",
+  "i-09cdf75ecaf1fc198",
+]
+```
+
+```bash
+terraform apply
+...
+Apply complete! Resources: 9 added, 0 changed, 0 destroyed.
+```
+
+Check http://elb-655865882.us-east-1.elb.amazonaws.com in terraform.tfstate file and see that load is slit between instances.
+
+Destroy LB 
+
+```bash
+terraform destroy
 ```
