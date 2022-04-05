@@ -1,6 +1,6 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE.md)
 
-# DevOPS master class 
+# DevOps master class 
 
 > Learn DevOps: Docker, Kubernetes, Terraform and Azure DevOps.
 
@@ -19,6 +19,18 @@
 git clone git@github.com:vyahello/devops-master-class.git
 ```
 
+### Syllabus
+
+- [Docker](docker)
+- [Kubernetes](kubernetes)
+- [Terraform](terraform)
+- [CI/CD](ci_cd)
+- [Azure](ci_cd/azure_devops_pipelines)
+- Jenkins
+- Ansible
+- AWS & Azure & Google Cloud
+
+>>>>>>> 7adf00a (Create sample azure project)
 Navigate to a corresponding folder section.
 
 **[⬆ back to top](#devops-master-class)**
