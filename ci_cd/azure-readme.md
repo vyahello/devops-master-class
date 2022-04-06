@@ -189,3 +189,38 @@ strategy:
 
 - Go to https://dev.azure.com/vjagello93/azure-devops-kuber-terra/_environments to check environments.
 - You can add 'Approvals' option for your job. 
+
+### Build and publish Docker image 
+
+Go to 'Service connection' and give permission to docker hub
+
+```yaml
+stages:
+- stage: Build
+  displayName: Build image
+  jobs:
+  - job: Build
+    displayName: Build
+    pool: SelfPool
+    steps:
+    - task: Docker@2
+      displayName: Build an image
+      inputs:
+        containerRegistry: 'in28min-docker-hub'
+        repository: 'vyahello/currency-exchange'
+        command: 'buildAndPush'
+        Dockerfile: '**/Dockerfile'
+        tags: '$(tag)'
+```
+
+
+### Azure devops releases
+
+https://dev.azure.com/vjagello93/azure-devops-kuber-terra/_release?_a=releases&view=mine&definitionId=1
+
+Go to 'Releases' and create a new pipeline. 
+
+Used `02-azure-pipelines-stages.yml` file.
+
+Release after push into branch -> Stages to deploy: Dev (run always), QA (run after manual approval)
+
