@@ -1,0 +1,22 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+# execute task on 2 different OS
+strategy:
+  matrix:
+    linux:
+      operatingSystem: 'ubuntu-latest'
+    mac:
+      operatingSystem: 'macos-latest'
+
+pool: 
+  vmImage: $(operatingSystem)
+
+steps:
+- script:  echo Running on $(operatingSystem)
+  displayName: 'Run a multi-line script'
