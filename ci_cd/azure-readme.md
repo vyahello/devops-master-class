@@ -224,3 +224,86 @@ Used `02-azure-pipelines-stages.yml` file.
 
 Release after push into branch -> Stages to deploy: Dev (run always), QA (run after manual approval)
 
+# Azure AKS with terraform 
+
+AKS - azure kubernetes service.
+
+Install az client via `brew update && brew install azure-cli`
+
+```bash
+az login
+[
+  {
+    "cloudName": "AzureCloud",
+    "homeTenantId": "1deabc10-cbcc-4a75-aadb-73c8a58f7b4b",
+    "id": "0ebe5978-3106-4ed2-abbf-f6f618a840b6",
+    "isDefault": true,
+    "managedByTenants": [],
+    "name": "Free trial",
+    "state": "Enabled",
+    "tenantId": "1deabc10-cbcc-4a75-aadb-73c8a58f7b4b",
+    "user": {
+      "name": "vjagello93@gmail.com",
+      "type": "user"
+    }
+  }
+]
+
+# create service account, which has access to everything
+az ad sp create-for-rbac --role="Contibutor" --scopes="/subscriptions/0ebe5978-3106-4ed2-abbf-f6f618a840b6"
+# create ssh public key
+ssh-keygen -m PEM -t rsa -b 4096
+```
+
+## Create K8s cluster in Azure using Azure DevOps
+
+Go to service connections -> New Service Connection -> Azure Service Manager 
+
+Install:
+- Terraform 1 (https://marketplace.visualstudio.com/items?itemName=ms-devlabs.custom-terraform-tasks)
+- Terraform 2 (https://marketplace.visualstudio.com/items?itemName=charleszipp.azure-pipelines-tasks-terraform)
+- Aws (https://marketplace.visualstudio.com/items?itemName=AmazonWebServices.aws-vsts-tools)
+
+Go to "Pipelines" and create new pipeline.
+
+Check config in [keys](azure_devops_pipelines/configuration/iaac/azure/k8s/.keys) file:
+- $(client_id) var is "appId"
+- $(client_secret) var is "password"
+- In "Library" add "Secure files" for ssh key and in "Pipelines" add "Download Secure Files"
+
+Terraform creates a cluster, Azure devops - where your pipelines are running, Azure - cloud provider.
+
+```yaml
+# 05-azure-k8s-iaac-cluster-pipeline.yml
+
+trigger:
+- master
+
+pool: SelfPool
+
+steps:
+- script: echo K8S Terraform Azure!
+  displayName: 'Run a one-line script'
+
+- task: DownloadSecureFile@1
+  name: publickey
+  inputs:
+    secureFile: 'azure_rsa.pub'
+    retryCount: '5'
+
+- task: TerraformCLI@0
+  inputs:
+    command: 'init'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/ci_cd/azure_devops_pipelines/configuration/iaac/azure/k8s'
+    commandOptions: '-var client_id=$(client_id) -var client_secret=$(client_secret) -var ssh_public_key=$(publickey.secureFilePath)'
+    backendType: 'azurerm'
+    backendServiceArm: 'azure-resource-manager-service-connection'
+    ensureBackend: true
+    backendAzureRmResourceGroupName: 'terraform-backend-rg'
+    backendAzureRmResourceGroupLocation: 'westeurope'
+    backendAzureRmStorageAccountName: 'storageaccvyah'
+    backendAzureRmContainerName: 'storageaccvyah'
+    backendAzureRmKey: 'k8s-dev.tfstate'
+```
+
+Go to https://portal.azure.com and check for resource groups -> storage account -> container.
