@@ -74,3 +74,46 @@ jobs:
   - script: echo Job2
     displayName: 'Run a one-line script'
 ```
+
+### Stages 
+
+```yaml
+stages:
+- stage: Build
+  jobs:
+  - job: FirstJob
+    steps:
+    - bash: echo Build FirstJob
+  - job: SecondJob
+    steps:
+    - bash: echo Build SecondJob
+- stage: DevDeploy
+  # add stage dependency
+  dependsOn: Build
+  jobs:
+  - job: DevDeployJob
+    steps:
+    - bash: echo Build DevDeployJob
+```
+
+### Variables 
+
+```yaml
+stages:
+- stage: Build
+  jobs:
+  - job: FirstJob
+    steps:
+    - bash: echo $(PipelineLevel)  # var is added in UI
+- stage: DevDeploy
+  # add stage dependency
+  dependsOn: Build
+  # add env variable
+  variables:
+    environment: dev
+  jobs:
+  - job: DevDeployJob
+    steps:
+    - bash: echo $(environment)DeployJob
+```
+
