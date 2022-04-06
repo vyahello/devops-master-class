@@ -159,3 +159,33 @@ Add config via cmd:
 ```
 
 Check 'drop' folder artifact.
+
+### Multiple agents
+
+```yaml
+strategy:
+  matrix:
+    linux:
+      operatingSystem: 'ubuntu-latest'
+    mac:
+      operatingSystem: 'macos-latest'
+```
+
+### Deployment job 
+
+```yaml
+- stage: QADeploy
+  jobs:
+  # we have one job which is a deployment
+  - deployment: QADeployJob
+    # will be deployed on QA env 
+    environment: QA
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - script: echo deploy to QA
+```
+
+- Go to https://dev.azure.com/vjagello93/azure-devops-kuber-terra/_environments to check environments.
+- You can add 'Approvals' option for your job. 
