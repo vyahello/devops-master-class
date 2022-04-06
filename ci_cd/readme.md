@@ -133,10 +133,12 @@ Predefined vars - https://docs.microsoft.com/en-us/azure/devops/pipelines/build/
 
 ### Copy and publish artifacts 
 
+Add config via UI:
 - Source folder - $(System.DefaultWorkingDirectory)
 - Contents - **/*.yaml, **/.tf
 - Target folder - $(Build.ArtifactStagingDirectory)
 
+Add config via cmd:
 ```yaml
     # copying files
     - task: CopyFiles@2
@@ -146,4 +148,14 @@ Predefined vars - https://docs.microsoft.com/en-us/azure/devops/pipelines/build/
           **/*.yaml
           **/.tf
         TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    - bash: ls -R $(Build.ArtifactStagingDirectory)
+
+    # publish artifacts
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'drop'
+        publishLocation: 'Container'
 ```
+
+Check 'drop' folder artifact.
