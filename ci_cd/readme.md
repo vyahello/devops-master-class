@@ -117,3 +117,16 @@ stages:
     - bash: echo $(environment)DeployJob
 ```
 
+Predefined vars - https://docs.microsoft.com/en-us/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml
+
+```yaml
+    steps:
+    - bash: echo Build SecondJob
+    - bash: echo $(PipelineLevel)
+    - bash: echo $(Build.BuildNumber)
+    - bash: echo $(Build.BuildId)
+    - bash: echo $(Build.SourcesBranchName)
+    - bash: echo $(Build.SourcesDirectory)
+    - bash: ls -R $(System.DefaultWorkingDirectory)
+    - bash: echo $(Build.ArtifactStagingDirectory)
+```
