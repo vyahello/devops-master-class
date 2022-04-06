@@ -23,10 +23,21 @@ stages:
     - bash: echo $(PipelineLevel)
     - bash: echo $(Build.BuildNumber)
     - bash: echo $(Build.BuildId)
-    - bash: echo $(Build.SourceBranchName)
+    - bash: echo $(Build.SourcesBranchName)
     - bash: echo $(Build.SourcesDirectory)
     - bash: ls -R $(System.DefaultWorkingDirectory)
     - bash: echo $(Build.ArtifactStagingDirectory)
+    - bash: java -version
+    - bash: ls -R $(Build.ArtifactStagingDirectory)
+
+    # copying files
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)'
+        Contents: |
+          **/*.yaml
+          **/.tf
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
 #- stage: DevDeploy
 #  # add stage dependency
 #  dependsOn: Build

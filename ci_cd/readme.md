@@ -130,3 +130,20 @@ Predefined vars - https://docs.microsoft.com/en-us/azure/devops/pipelines/build/
     - bash: ls -R $(System.DefaultWorkingDirectory)
     - bash: echo $(Build.ArtifactStagingDirectory)
 ```
+
+### Copy and publish artifacts 
+
+- Source folder - $(System.DefaultWorkingDirectory)
+- Contents - **/*.yaml, **/.tf
+- Target folder - $(Build.ArtifactStagingDirectory)
+
+```yaml
+    # copying files
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)'
+        Contents: |
+          **/*.yaml
+          **/.tf
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+```
