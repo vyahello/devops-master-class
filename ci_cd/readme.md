@@ -51,5 +51,24 @@ https://dev.azure.com/vjagello93/azure-devops-kuber-terra
 - Go to pipelines and select github repo 
 - Create YAML pipeline. In case of pool issues you need to configure self-hosted pool via https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/v2-osx?view=azure-devops
 - Click run and commit the pipeline 
-- Check pipeline config: [azure-pipelines.yml](azure_devops_pipelines/azure-pipelines.yml)
+- Check pipeline config: [azure-pipelines.yml](azure_devops_pipelines/pipelines/01-azure-pipelines.yml)
 - Check job result via https://dev.azure.com/vjagello93/azure-devops-kuber-terra/_build
+- Check raw logs via https://dev.azure.com/vjagello93/5d787896-6c24-4ff8-b513-68c46c6bb846/_apis/build/builds/6/logs/10
+
+### DependsOn 
+
+```yaml
+jobs:
+- job: Job1
+  steps:
+  # task 1
+  - script: echo Job1 - Hello, world!
+    displayName: 'Run a one-line script'
+
+- job: Job2
+  dependsOn: Job1
+  steps:
+  # task 1
+  - script: echo Job2
+    displayName: 'Run a one-line script'
+```
