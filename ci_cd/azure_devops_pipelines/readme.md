@@ -518,7 +518,13 @@ Now you can connect to our K8S cluster from Azure DevOps
 
 ### Create pipeline for deploying microservices to AWS EKS 
 
-```yaml
-# 08-aws-k8s-code-ci-cd-pipeline.yml
+Check `08-aws-k8s-code-ci-cd-pipeline.yml` file.
 
+```bash
+kubectl get svc
+
+currency-exchange   LoadBalancer   10.100.124.89   a85a95a59ac70478a962b90c2b24b0fb-781103902.us-east-1.elb.amazonaws.com   8000:30137/TCP   3m1
 ```
+
+Open `a85a95a59ac70478a962b90c2b24b0fb-781103902.us-east-1.elb.amazonaws.com:8000` in browser.
+

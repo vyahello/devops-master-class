@@ -1,0 +1,77 @@
+# Docker
+# Build a Docker image
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+- master
+
+resources:
+- repo: self
+
+variables:
+  tag: '$(Build.BuildId)'
+
+stages:
+# Build stage
+# Build docker image
+# Push docker -> 100
+# Copy Files to Staging Directory
+# Publish
+- stage: Build
+  displayName: Build image
+  jobs:
+  - job: Build
+    displayName: Build
+    pool: SelfPool
+    steps:
+    # it will create a docker image and push in artifactory
+    - task: Docker@2
+      displayName: Build and Push an image
+      inputs:
+        # name in "Service Connections"
+        containerRegistry: 'in28min-docker-hub'
+        repository: 'vyahello/currency-exchange'
+        command: 'buildAndPush'
+        Dockerfile: '**/Dockerfile'
+        tags: '$(tag)'
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)'
+        # to copy our deployment.yml file
+        Contents: '**/*.yml'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    # publish artifacts
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'manifests'
+        publishLocation: 'Container'
+
+# Deploy stage
+# Download
+# image:100 -> Deploy to k8s 
+# apply - kubectl apply -f deployment.yaml
+- stage: Deploy
+  displayName: Deploy image
+  jobs:
+  - job: Deploy
+    displayName: Deploy
+    pool: SelfPool
+    steps:
+    # Download pipeline artifacts
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        buildType: 'current'
+        artifactName: 'manifests'
+        itemPattern: |
+          **/*.yaml
+          **/*.yml
+        targetPath: '$(System.ArtifactsDirectory)'
+    # Deploy to K8S 
+    - task: KubernetesManifest@0
+      inputs:
+        action: 'deploy'
+        kubernetesServiceConnection: 'aws-k8s-cluster-service'
+        namespace: 'default'
+        manifests: '$(System.ArtifactsDirectory)/ci_cd/azure_devops_pipelines/configuration/k8s/deployment.yml'
+        containers: vyahello/currency-exchange:$(tag)
