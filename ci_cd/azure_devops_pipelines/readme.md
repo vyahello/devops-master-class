@@ -1,57 +1,397 @@
-# Currency Exchange Micro Service - H2
+# Azure devops 
 
-Run com.in28minutes.microservices.currencyconversionservice.CurrencyConversionServiceApplicationH2 as a Java Application.
+Allows continuous integration, deployment and delivery of software.
 
-## Resources
+Create Azure account and go to https://portal.azure.com 
 
-- http://localhost:8000/currency-exchange/from/USD/to/INR
+Go to https://dev.azure.com
 
-```json
-{
-  "id": 10001,
-  "from": "USD",
-  "to": "INR",
-  "conversionMultiple": 65.00,
-  "environmentInfo": "NA"
-}
+### Create Azure devops project 
+
+https://dev.azure.com/vjagello93/azure-devops-kuber-terra
+
+- Go to pipelines and select github repo 
+- Create YAML pipeline. In case of pool issues you need to configure self-hosted pool via https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/v2-osx?view=azure-devops
+- Click run and commit the pipeline 
+- Check pipeline config: [azure-pipelines.yml](pipelines/01-azure-pipelines-jobs.yml)
+- Check job result via https://dev.azure.com/vjagello93/azure-devops-kuber-terra/_build
+- Check raw logs via https://dev.azure.com/vjagello93/5d787896-6c24-4ff8-b513-68c46c6bb846/_apis/build/builds/6/logs/10
+
+### DependsOn 
+
+```yaml
+# 02-azure-pipelines-stages.yml
+
+jobs:
+- job: Job1
+  steps:
+  # task 1
+  - script: echo Job1 - Hello, world!
+    displayName: 'Run a one-line script'
+
+- job: Job2
+  dependsOn: Job1
+  steps:
+  # task 1
+  - script: echo Job2
+    displayName: 'Run a one-line script'
 ```
 
-## H2 Console
+### Stages 
 
-- http://localhost:8000/h2-console
-- Use `jdbc:h2:mem:testdb` as JDBC URL
-
-
-## Notes
-
-## Tables Created
+```yaml
+stages:
+- stage: Build
+  jobs:
+  - job: FirstJob
+    steps:
+    - bash: echo Build FirstJob
+  - job: SecondJob
+    steps:
+    - bash: echo Build SecondJob
+- stage: DevDeploy
+  # add stage dependency
+  dependsOn: Build
+  jobs:
+  - job: DevDeployJob
+    steps:
+    - bash: echo Build DevDeployJob
 ```
-create table exchange_value 
-(
-	id bigint not null, 
-	conversion_multiple decimal(19,2), 
-	currency_from varchar(255), 
-	currency_to varchar(255), 
-	primary key (id)
-)
+
+### Variables 
+
+```yaml
+stages:
+- stage: Build
+  jobs:
+  - job: FirstJob
+    steps:
+    - bash: echo $(PipelineLevel)  # var is added in UI
+- stage: DevDeploy
+  # add stage dependency
+  dependsOn: Build
+  # add env variable
+  variables:
+    environment: dev
+  jobs:
+  - job: DevDeployJob
+    steps:
+    - bash: echo $(environment)DeployJob
 ```
 
-## Containerization
+Predefined vars - https://docs.microsoft.com/en-us/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml
 
-### Troubleshooting
-
-- Problem - Caused by: com.spotify.docker.client.shaded.javax.ws.rs.ProcessingException: java.io.IOException: No such file or directory
-- Solution - Check if docker is up and running!
-- Problem - Error creating the Docker image on MacOS - java.io.IOException: Cannot run program “docker-credential-osxkeychain”: error=2, No such file or directory
-- Solution - https://medium.com/@dakshika/error-creating-the-docker-image-on-macos-wso2-enterprise-integrator-tooling-dfb5b537b44e
-
-### Creating Container
-
-- mvn package
-
-### Running Container
-
-#### Basic
+```yaml
+    steps:
+    - bash: echo Build SecondJob
+    - bash: echo $(PipelineLevel)
+    - bash: echo $(Build.BuildNumber)
+    - bash: echo $(Build.BuildId)
+    - bash: echo $(Build.SourcesBranchName)
+    - bash: echo $(Build.SourcesDirectory)
+    - bash: ls -R $(System.DefaultWorkingDirectory)
+    - bash: echo $(Build.ArtifactStagingDirectory)
 ```
-docker container run --publish 8000:8000 in28min/currency-exchange:0.0.1-SNAPSHOT
+
+### Copy and publish artifacts 
+
+Add config via UI:
+- Source folder - $(System.DefaultWorkingDirectory)
+- Contents - **/*.yaml, **/.tf
+- Target folder - $(Build.ArtifactStagingDirectory)
+
+Add config via cmd:
+```yaml
+    # copying files
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)'
+        Contents: |
+          **/*.yaml
+          **/.tf
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    - bash: ls -R $(Build.ArtifactStagingDirectory)
+
+    # publish artifacts
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'drop'
+        publishLocation: 'Container'
+```
+
+Check 'drop' folder artifact.
+
+### Multiple agents
+
+```yaml
+strategy:
+  matrix:
+    linux:
+      operatingSystem: 'ubuntu-latest'
+    mac:
+      operatingSystem: 'macos-latest'
+```
+
+### Deployment job 
+
+```yaml
+- stage: QADeploy
+  jobs:
+  # we have one job which is a deployment
+  - deployment: QADeployJob
+    # will be deployed on QA env 
+    environment: QA
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - script: echo deploy to QA
+```
+
+- Go to https://dev.azure.com/vjagello93/azure-devops-kuber-terra/_environments to check environments.
+- You can add 'Approvals' option for your job. 
+
+### Build and publish Docker image 
+
+Go to 'Service connection' and give permission to docker hub
+
+```yaml
+stages:
+- stage: Build
+  displayName: Build image
+  jobs:
+  - job: Build
+    displayName: Build
+    pool: SelfPool
+    steps:
+    - task: Docker@2
+      displayName: Build an image
+      inputs:
+        containerRegistry: 'in28min-docker-hub'
+        repository: 'vyahello/currency-exchange'
+        command: 'buildAndPush'
+        Dockerfile: '**/Dockerfile'
+        tags: '$(tag)'
+```
+
+
+### Azure devops releases
+
+https://dev.azure.com/vjagello93/azure-devops-kuber-terra/_release?_a=releases&view=mine&definitionId=1
+
+Go to 'Releases' and create a new pipeline. 
+
+Used `02-azure-pipelines-stages.yml` file.
+
+Release after push into branch -> Stages to deploy: Dev (run always), QA (run after manual approval)
+
+# Azure AKS with terraform 
+
+AKS - azure kubernetes service.
+
+Install az client via `brew update && brew install azure-cli`
+
+```bash
+az login
+[
+  {
+    "cloudName": "AzureCloud",
+    "homeTenantId": "1deabc10-cbcc-4a75-aadb-73c8a58f7b4b",
+    "id": "0ebe5978-3106-4ed2-abbf-f6f618a840b6",
+    "isDefault": true,
+    "managedByTenants": [],
+    "name": "Free trial",
+    "state": "Enabled",
+    "tenantId": "1deabc10-cbcc-4a75-aadb-73c8a58f7b4b",
+    "user": {
+      "name": "vjagello93@gmail.com",
+      "type": "user"
+    }
+  }
+]
+
+# create service account, which has access to everything
+az ad sp create-for-rbac --role="Contributor" --scopes="/subscriptions/0ebe5978-3106-4ed2-abbf-f6f618a840b6"
+# create ssh public key
+ssh-keygen -m PEM -t rsa -b 4096
+```
+
+## Create K8s cluster in Azure using Azure DevOps
+
+Go to service connections -> New Service Connection -> Azure Service Manager 
+
+Install:
+- Terraform 1 (https://marketplace.visualstudio.com/items?itemName=ms-devlabs.custom-terraform-tasks)
+- Terraform 2 (https://marketplace.visualstudio.com/items?itemName=charleszipp.azure-pipelines-tasks-terraform)
+- Aws (https://marketplace.visualstudio.com/items?itemName=AmazonWebServices.aws-vsts-tools)
+
+Go to "Pipelines" and create new pipeline.
+
+Check config in [keys](configuration/iaac/azure/k8s/.keys) file:
+- $(client_id) var is "appId"
+- $(client_secret) var is "password"
+- In "Library" add "Secure files" for ssh key and in "Pipelines" add "Download Secure Files"
+
+Terraform creates a cluster, Azure devops - where your pipelines are running, Azure - cloud provider.
+
+```yaml
+# 05-azure-k8s-iaac-cluster-pipeline.yml
+
+trigger:
+- master
+
+pool: SelfPool
+
+steps:
+- script: echo K8S Terraform Azure!
+  displayName: 'Run a one-line script'
+
+- task: DownloadSecureFile@1
+  name: publickey
+  inputs:
+    secureFile: 'azure_rsa.pub'
+    retryCount: '5'
+
+- task: TerraformCLI@0
+  inputs:
+    command: 'init'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/ci_cd/azure_devops_pipelines/configuration/iaac/azure/k8s'
+    commandOptions: '-var client_id=$(client_id) -var client_secret=$(client_secret) -var ssh_public_key=$(publickey.secureFilePath)'
+    backendType: 'azurerm'
+    backendServiceArm: 'azure-resource-manager-service-connection'
+    ensureBackend: true
+    backendAzureRmResourceGroupName: 'terraform-backend-rg'
+    backendAzureRmResourceGroupLocation: 'westeurope'
+    backendAzureRmStorageAccountName: 'storageaccvyah'
+    backendAzureRmContainerName: 'storageaccvyah'
+    backendAzureRmKey: 'k8s-dev.tfstate'
+```
+
+Go to https://portal.azure.com and check for resource groups -> storage account -> container.
+
+
+### Terraform apply to create Azure Kubernetes Cluster in Azure
+
+```yaml
+# terraform apply part
+- task: TerraformCLI@0
+  inputs:
+    command: 'apply'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/ci_cd/azure_devops_pipelines/configuration/iaac/azure/k8s'
+    commandOptions: '-var client_id=$(client_id) -var client_secret=$(client_secret) -var ssh_public_key=$(publickey.secureFilePath)'
+    environmentServiceName: 'azure-resource-manager-service'
+```
+
+It will initially run `terraform init` and then `terraform apply` commands.
+
+### Connect to Azure Kubernetes Cluster
+
+```bash
+az login
+az aks get-credentials --name=k8stest_dev --resource-group=kubernetes_dev
+kubectl get svc
+
+NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.0.0.1    <none>        443/TCP   6d14h
+```
+
+### Deploy microservice to Azure AKS with K8S 
+
+We are setup CI/CD pipeline for IAAC, you can increase n of nodes, change your kubernetes cluster just by commiting something to github repository.
+
+Same as for your code, you setup CI/CD around your code, when you made changes, it will be automatically picked up and deployed.
+
+Idea (made automatically by CI/CD):
+  - push code on github
+  - build and push docker image
+  - use docker image in k8s cluster 
+  - deploy app in azure k8s cloud with new changes 
+
+Configure connection to the kubernetes cluster via 'Service connections'.
+
+```yaml
+# 06-azure-kubernetes-ci-ci.yml
+
+trigger:
+- master
+
+resources:
+- repo: self
+
+variables:
+  # tag: '$(Build.BuildId)'
+  tag: 29
+
+stages:
+# Stage 1
+# Build Docker image 
+- stage: Build
+  displayName: Build image
+  jobs:
+  - job: Build
+    displayName: Build
+    pool: SelfPool
+    steps:
+    - task: Docker@2
+      displayName: Build an image
+      inputs:
+        containerRegistry: 'in28min-docker-hub'
+        repository: 'vyahello/currency-exchange'
+        command: 'buildAndPush'
+        Dockerfile: '**/Dockerfile'
+        tags: '$(tag)'
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)'
+        Contents: '**/*.yml'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    # create artifacts
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'manifests'
+        publishLocation: 'Container'
+# Step 2
+- stage: Deploy
+  displayName: Deploy image
+  jobs:
+  - job: Deploy
+    displayName: Deploy
+    pool: SelfPool
+    steps:
+    # Download artifacts
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        buildType: 'current'
+        artifactName: 'manifests'
+        itemPattern: '**/*.yml'
+        targetPath: '$(System.ArtifactsDirectory)'
+    # run again k8s 
+    - task: KubernetesManifest@0 
+      inputs:
+        action: 'deploy'
+        kubernetesServiceConnection: 'azure-kubernetes-connection'
+        namespace: 'default'
+        manifests: '$(System.ArtifactsDirectory)/ci_cd/azure_devops_pipelines/configuration/k8s/deployment.yml'
+        containers: 'vyahello/currency-exchange:$(tag)'
+```
+
+```bash
+# get ip and port and open in browser
+kubectl get svc
+kubectl get pods
+# you should see 'vyahello/currency-exchange:35' image
+kubectl get rs -o wide
+```
+
+### Destroy Azure Kubernetes Cluster in Azu
+
+```yaml
+# terraform destroy part
+- task: TerraformCLI@0
+  inputs:
+    command: 'destroy'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/ci_cd/azure_devops_pipelines/configuration/iaac/azure/k8s'
+    environmentServiceName: 'azure-resource-manager-service'
 ```
