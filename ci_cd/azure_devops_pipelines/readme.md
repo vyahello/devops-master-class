@@ -395,3 +395,27 @@ kubectl get rs -o wide
     workingDirectory: '$(System.DefaultWorkingDirectory)/ci_cd/azure_devops_pipelines/configuration/iaac/azure/k8s'
     environmentServiceName: 'azure-resource-manager-service'
 ```
+
+# AWS EKS with Terraform 
+
+Check [aws](configuration/iaac/aws) folder.
+
+EKS - elastic kubernetes service.
+
+Check terraform module - https://github.com/terraform-aws-modules/terraform-aws-eks.
+
+We will setup 2 pipelines:
+  - one to provision a cluster
+  - second to do ci/cd and build a docker image and deploy it to kubernetes cluster
+  - pipelines will be running in Azure DevOps
+
+Create `terraform-backend-state-vyah` S3 bucket.
+
+We need to make Azure DevOps talk to AWS via `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
+
+## Create K8S cluster in AWS from Azure DevOps 
+
+Download https://marketplace.visualstudio.com/items?itemName=AmazonWebServices.aws-vsts-tools
+
+Via https://dev.azure.com add "New Service Connection" -> "AWS for Terraform"
+
