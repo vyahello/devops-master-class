@@ -1,0 +1,19 @@
+trigger:
+- master
+
+pool: SelfPool
+
+steps:
+- script: echo Hello, world!
+  displayName: 'Run a one-line script'
+
+# terraform task
+- task: TerraformTaskV1@0
+  inputs:
+    provider: 'aws'
+    # terraform init command
+    command: 'init'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/ci_cd/azure_devops_pipelines/configuration/iaac/aws/k8s'
+    backendServiceAWS: 'aws-for-terraform'
+    backendAWSBucketName: 'terraform-backend-state-vyah'
+    backendAWSKey: 'k8s-dev.tfstate'

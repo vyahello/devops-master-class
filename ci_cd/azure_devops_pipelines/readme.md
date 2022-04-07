@@ -413,9 +413,47 @@ Create `terraform-backend-state-vyah` S3 bucket.
 
 We need to make Azure DevOps talk to AWS via `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
 
-## Create K8S cluster in AWS from Azure DevOps 
+## Create Azure DevOps pipeline
 
 Download https://marketplace.visualstudio.com/items?itemName=AmazonWebServices.aws-vsts-tools
 
 Via https://dev.azure.com add "New Service Connection" -> "AWS for Terraform"
+
+```yaml
+# 07-aws-k8s-iaac-pipeline.yml
+
+trigger:
+- master
+
+pool: SelfPool
+
+steps:
+- script: echo Hello, world!
+  displayName: 'Run a one-line script'
+
+# terraform task
+- task: TerraformTaskV1@0
+  inputs:
+    provider: 'aws'
+    # terraform init command
+    command: 'init'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/ci_cd/azure_devops_pipelines/configuration/iaac/aws/k8s'
+    backendServiceAWS: 'aws-for-terraform'
+    backendAWSBucketName: 'terraform-backend-state-vyah'
+    backendAWSKey: 'k8s-dev.tfstate'
+```
+
+Check raw logs after pipeline run:
+
+```bash
+/usr/local/bin/terraform init \ 
+  -backend-config=bucket=terraform-backend-state-vyah \
+  -backend-config=key=k8s-dev.tfstate \
+  -backend-config=region=*** \
+  -backend-config=access_key=*** \
+  -backend-config=secret_key=***
+```
+
+## Terraform apply to create AWS EKS cluster in Azure DevOps 
+
 
