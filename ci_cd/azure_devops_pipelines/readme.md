@@ -443,8 +443,7 @@ steps:
     backendAWSKey: 'k8s-dev.tfstate'
 ```
 
-Check raw logs after pipeline run:
-
+Check pipeline raw logs after run:
 ```bash
 /usr/local/bin/terraform init \ 
   -backend-config=bucket=terraform-backend-state-vyah \
@@ -452,8 +451,74 @@ Check raw logs after pipeline run:
   -backend-config=region=*** \
   -backend-config=access_key=*** \
   -backend-config=secret_key=***
+
+Terraform has been successfully initialized
 ```
 
 ## Terraform apply to create AWS EKS cluster in Azure DevOps 
 
+```yaml
+# terraform apply task
+- task: TerraformTaskV1@0
+  inputs:
+    provider: 'aws'
+    # terraform appy command
+    command: 'apply'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/ci_cd/azure_devops_pipelines/configuration/iaac/aws/k8s'
+    environmentServiceName: 'aws-for-terraform'
+```
 
+## Deploy to K8S cluster from pipeline
+
+### Install AWS CLI
+
+```bash
+curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
+unzip awscli-bundle.zip
+sudo ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
+aws --version
+```
+
+### Create connection to K8S
+
+Get k8s cluster config
+```bash
+aws configure
+...
+aws eks --region us-east-1 update-kubeconfig --name=in28minutes-cluster
+Added new context arn:aws:eks:us-east-1:708363104337:cluster/in28minutes-cluster to /Users/fox/.kube/config
+
+# we are connected to aws k8s cluster
+kubectl version
+# our client version
+Client Version: version.Info{Major:"1", Minor:"23", GitVersion:"v1.23.5", GitCommit:"c285e781331a3785a7f436042c65c5641ce8a9e9", GitTreeState:"clean", BuildDate:"2022-03-16T15:58:47Z", GoVersion:"go1.17.8", Compiler:"gc", Platform:"darwin/amd64"}
+# AWS server version on EKS
+Server Version: version.Info{Major:"1", Minor:"21+", GitVersion:"v1.21.5-eks-bc4871b", GitCommit:"5236faf39f1b7a7dabea8df12726f25608131aa9", GitTreeState:"clean", BuildDate:"2021-10-29T23:32:16Z", GoVersion:"go1.16.8", Compiler:"gc", Platform:"linux/amd64"}
+
+kubectl get svc
+# get Server URL
+kubectl cluster-info
+# Server URL, need this to create service connection via Azure
+Kubernetes control plane is running at https://473F679F61C5FA04CA3832184008EB91.gr7.us-east-1.eks.amazonaws.com
+CoreDNS is running at https://473F679F61C5FA04CA3832184008EB91.gr7.us-east-1.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+
+# get "secrets"
+kubectl get serviceaccounts default -o yaml
+# get secret and copy it from "apiVersion: v1 to end"
+kubectl get secret default-token-gjltt -o yaml
+```
+
+Go to 'Service connections' -> K8S:
+  - Service Account 
+  - Service URL: https://473F679F61C5FA04CA3832184008EB91.gr7.us-east-1.eks.amazonaws.com
+  - Secret: 
+  - Service connection name: aws-k8s-cluster-service
+
+Now you can connect to our K8S cluster from Azure DevOps 
+
+### Create pipeline for deploying microservices to AWS EKS 
+
+```yaml
+# 08-aws-k8s-code-ci-cd-pipeline.yml
+
+```

@@ -7,7 +7,7 @@ steps:
 - script: echo Hello, world!
   displayName: 'Run a one-line script'
 
-# terraform task
+# terraform init task
 - task: TerraformTaskV1@0
   inputs:
     provider: 'aws'
@@ -17,3 +17,11 @@ steps:
     backendServiceAWS: 'aws-for-terraform'
     backendAWSBucketName: 'terraform-backend-state-vyah'
     backendAWSKey: 'k8s-dev.tfstate'
+# terraform apply task
+- task: TerraformTaskV1@0
+  inputs:
+    provider: 'aws'
+    # terraform appy command
+    command: 'apply'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/ci_cd/azure_devops_pipelines/configuration/iaac/aws/k8s'
+    environmentServiceNameAWS: 'aws-for-terraform'

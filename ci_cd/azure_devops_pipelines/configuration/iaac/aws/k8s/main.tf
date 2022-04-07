@@ -7,6 +7,15 @@
 // configuring backend of S3, to store local state to remote backend,
 // we want to use S3 as a backend
 terraform {
+  # https://github.com/hashicorp/terraform-provider-aws
+  required_providers {
+    aws = {
+      # install terraform package from hashicorp/aws
+      source  = "hashicorp/aws"
+      # terraform package version
+      # version = "~> 3.0"
+    }
+  }
   backend "s3" {
     bucket = "mybucket" # Will be overridden from build
     key    = "path/to/my/key" # Will be overridden from build
@@ -33,8 +42,9 @@ provider "kubernetes" {
 // terraform module called eks - https://github.com/terraform-aws-modules/terraform-aws-eks
 module "in28minutes-cluster" {
   source          = "terraform-aws-modules/eks/aws"
+  version         = "17.10.0"
   cluster_name    = "in28minutes-cluster"
-  cluster_version = "1.14"
+  cluster_version = "1.21"
   subnets         = ["subnet-03e9bbe7f48e853a7", "subnet-0122aa9b49ab1ffe3"] #CHANGE
   #subnets = data.aws_subnet_ids.subnets.ids
   vpc_id          = aws_default_vpc.default.id
@@ -45,9 +55,9 @@ module "in28minutes-cluster" {
   node_groups = [
     {
       instance_type = "t2.micro"
-      max_capacity  = 5
-      desired_capacity = 3
-      min_capacity  = 3
+      asg_max_size  = 3
+#      desired_capacity = 3
+#      min_capacity  = 3
     }
   ]
 }
