@@ -528,3 +528,28 @@ currency-exchange   LoadBalancer   10.100.124.89   a85a95a59ac70478a962b90c2b24b
 
 Open `a85a95a59ac70478a962b90c2b24b0fb-781103902.us-east-1.elb.amazonaws.com:8000` in browser.
 
+### CI/CD of K8S 
+
+```bash
+# check app is deployed to K8S
+kubectl get pods
+# get deployment info
+kubectl get rs -o wide
+```
+
+### Delete AWS EKS cluster in Azure DevOps 
+
+```yaml
+# terraform destroy part
+- task: TerraformTaskV1@0
+  inputs:
+    provider: 'aws'
+    command: 'destroy'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/ci_cd/azure_devops_pipelines/configuration/iaac/azure/k8s'
+    environmentServiceName: 'aws-for-terraform'
+```
+
+Delete EKS clusters and all AWS data. 
+
+# Azure Devops with Boards and Backlogs 
+
