@@ -28,9 +28,7 @@ git clone git@github.com:vyahello/devops-master-class.git
 - [Azure](ci_cd/azure_devops_pipelines)
 - Jenkins
 - Ansible
-- AWS & Azure & Google Cloud
 
->>>>>>> 7adf00a (Create sample azure project)
 Navigate to a corresponding folder section.
 
 **[⬆ back to top](#devops-master-class)**

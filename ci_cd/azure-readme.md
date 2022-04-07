@@ -333,3 +333,94 @@ kubectl get svc
 NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
 kubernetes   ClusterIP   10.0.0.1    <none>        443/TCP   6d14h
 ```
+
+### Deploy microservice to Azure AKS with K8S 
+
+We are setup CI/CD pipeline for IAAC, you can increase n of nodes, change your kubernetes cluster just by commiting something to github repository.
+
+Same as for your code, you setup CI/CD around your code, when you made changes, it will be automatically picked up and deployed.
+
+Idea (made automatically by CI/CD):
+  - push code on github
+  - build and push docker image
+  - use docker image in k8s cluster 
+  - deploy app in azure k8s cloud with new changes 
+
+Configure connection to the kubernetes cluster via 'Service connections'.
+
+```yaml
+# 06-azure-kubernetes-ci-ci.yml
+
+trigger:
+- master
+
+resources:
+- repo: self
+
+variables:
+  # tag: '$(Build.BuildId)'
+  tag: 29
+
+stages:
+# Stage 1
+# Build Docker image 
+- stage: Build
+  displayName: Build image
+  jobs:
+  - job: Build
+    displayName: Build
+    pool: SelfPool
+    steps:
+    - task: Docker@2
+      displayName: Build an image
+      inputs:
+        containerRegistry: 'in28min-docker-hub'
+        repository: 'vyahello/currency-exchange'
+        command: 'buildAndPush'
+        Dockerfile: '**/Dockerfile'
+        tags: '$(tag)'
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)'
+        Contents: '**/*.yml'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    # create artifacts
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'manifests'
+        publishLocation: 'Container'
+# Step 2
+- stage: Deploy
+  displayName: Deploy image
+  jobs:
+  - job: Deploy
+    displayName: Deploy
+    pool: SelfPool
+    steps:
+    # Download artifacts
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        buildType: 'current'
+        artifactName: 'manifests'
+        itemPattern: '**/*.yml'
+        targetPath: '$(System.ArtifactsDirectory)'
+    # run again k8s 
+    - task: KubernetesManifest@0 
+      inputs:
+        action: 'deploy'
+        kubernetesServiceConnection: 'azure-kubernetes-connection'
+        namespace: 'default'
+        manifests: '$(System.ArtifactsDirectory)/ci_cd/azure_devops_pipelines/configuration/k8s/deployment.yml'
+        containers: 'vyahello/currency-exchange:$(tag)'
+```
+
+```bash
+# get ip and port and open in browser
+kubectl get svc
+kubectl get pods
+# you should see 'vyahello/currency-exchange:35' image
+kubectl get rs -o wide
+```
+
+### Destroy Azure Kubernetes Cluster in Azu 

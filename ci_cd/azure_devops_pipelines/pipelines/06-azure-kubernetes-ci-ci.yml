@@ -1,0 +1,73 @@
+# Used for code CI/CD
+
+trigger:
+- master
+
+resources:
+- repo: self
+
+variables:
+  # tag: '$(Build.BuildId)'
+  tag: 29
+
+stages:
+# Stage 1
+# Build Docker image 
+- stage: Build
+  displayName: Build image
+  jobs:
+  - job: Build
+    displayName: Build
+    pool: SelfPool
+    steps:
+    - task: Docker@2
+      displayName: Build an image
+      inputs:
+        containerRegistry: 'in28min-docker-hub'
+        repository: 'vyahello/currency-exchange'
+        command: 'buildAndPush'
+        Dockerfile: '**/Dockerfile'
+        tags: '$(tag)'
+    - task: CopyFiles@2
+      # copy deployment.yml file for k8s locally into cloud
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)'
+        Contents: '**/*.yml'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    # create artifacts
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'manifests'
+        publishLocation: 'Container'
+# Step 2
+- stage: Deploy
+  displayName: Deploy image
+  jobs:
+  - job: Deploy
+    displayName: Deploy
+    pool: SelfPool
+    steps:
+    # Download artifacts
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        buildType: 'current'
+        artifactName: 'manifests'
+        itemPattern: '**/*.yml'
+        targetPath: '$(System.ArtifactsDirectory)'
+    # run again k8s
+    - task: KubernetesManifest@0 
+      inputs:
+        action: 'deploy'
+        kubernetesServiceConnection: 'azure-kubernetes-connection'
+        namespace: 'default'
+        manifests: '$(System.ArtifactsDirectory)/ci_cd/azure_devops_pipelines/configuration/k8s/deployment.yml'
+        containers: 'vyahello/currency-exchange:$(tag)'
+
+# Stage 1
+# Build Docker image 
+# Get K8S config files 
+
+# Stage 2 
+# Download the K8S Files 
+# Deploy to K8S cluster with docker image 
