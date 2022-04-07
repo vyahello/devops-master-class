@@ -32,9 +32,9 @@ resource "azurerm_kubernetes_cluster" "terraform-k8s" {
   // config node pool
   default_node_pool {
     // node pool name
-    name            = "agentpool"
-    node_count      = var.node_count
-    vm_size         = "standard_b2ms"  // 1 CPU, 2 GB Mem
+    name            = "default"
+    node_count      = 1
+    vm_size         = "standard_d2ads_v5"  // 1 CPU, 2 GB Mem
   }
 
   // to be able to talk to azure

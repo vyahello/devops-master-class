@@ -250,7 +250,7 @@ az login
 ]
 
 # create service account, which has access to everything
-az ad sp create-for-rbac --role="Contibutor" --scopes="/subscriptions/0ebe5978-3106-4ed2-abbf-f6f618a840b6"
+az ad sp create-for-rbac --role="Contributor" --scopes="/subscriptions/0ebe5978-3106-4ed2-abbf-f6f618a840b6"
 # create ssh public key
 ssh-keygen -m PEM -t rsa -b 4096
 ```
@@ -307,3 +307,29 @@ steps:
 ```
 
 Go to https://portal.azure.com and check for resource groups -> storage account -> container.
+
+
+### Terraform apply to create Azure Kubernetes Cluster in Azure
+
+```yaml
+# terraform apply part
+- task: TerraformCLI@0
+  inputs:
+    command: 'apply'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/ci_cd/azure_devops_pipelines/configuration/iaac/azure/k8s'
+    commandOptions: '-var client_id=$(client_id) -var client_secret=$(client_secret) -var ssh_public_key=$(publickey.secureFilePath)'
+    environmentServiceName: 'azure-resource-manager-service'
+```
+
+It will initially run `terraform init` and then `terraform apply` commands.
+
+### Connect to Azure Kubernetes Cluster
+
+```bash
+az login
+az aks get-credentials --name=k8stest_dev --resource-group=kubernetes_dev
+kubectl get svc
+
+NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.0.0.1    <none>        443/TCP   6d14h
+```
