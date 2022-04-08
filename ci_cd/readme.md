@@ -22,7 +22,7 @@ Code commit -> Code quality  -> Unit tests -> Integration tests -> Package -> De
 
 # Tools 
 
-Jenkins and Azure devops.
+[Jenkins](jenkins) and [Azure DevOps](azure_devops_pipelines).
 
 We need to create CI/CD pipelines.
 
@@ -35,4 +35,3 @@ CD in depth:
   - Run Additional tests (smoke, functional, performance tests)
   - Once auto/manual tests are fine, you go and approve
   - Deploy app on the next env. If you approve on qa, then app will be deployed on stage env
-  

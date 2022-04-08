@@ -100,7 +100,7 @@ docker login
 docker push vyahello/hello-python:0.0.1
 ```
 
-_ENTRYPOINT_ vs _CMD_ 
+### ENTRYPOINT vs CMD
 
 ENTRYPOINT is used to be static, but you can overwrite via `--entrypoint` cli arg
 

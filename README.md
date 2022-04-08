@@ -26,14 +26,12 @@ git clone git@github.com:vyahello/devops-master-class.git
 - [Terraform](terraform)
 - [CI/CD](ci_cd)
 - [Azure](ci_cd/azure_devops_pipelines)
-- Jenkins
+- [Jenkins](ci_cd/jenkins)
 - Ansible
 
 Navigate to a corresponding folder section.
 
 **[⬆ back to top](#devops-master-class)**
-
-## Development notes
 
 ### Meta
 
@@ -54,10 +52,5 @@ You can reach out me at:
 4. Commit your changes (git commit -am 'Add some fooBar')
 5. Push to the branch (git push origin feature/fooBar)
 6. Create a new Pull Request
-
-### What's next
-
-All recent activities and ideas are described at project [issues](https://github.com/vyahello/devops-master-class/issues) page. 
-If you have ideas you want to change/implement please do not hesitate and create an issue.
 
 **[⬆ back to top](#devops-master-class)**
