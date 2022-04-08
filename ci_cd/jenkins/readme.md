@@ -31,6 +31,7 @@ docker-compose up
 node is a machine that runs your pipeline.
 
 ```groovy
+// Scripted pipeline
 // runs your pipeline
 node {
 	echo "Build"
@@ -67,3 +68,18 @@ pipeline {
 }
 ```
 
+Add post action
+```groovy
+    // action to execute after all stages
+    post {
+        always {
+            echo "Always run"
+        }
+        success {
+            echo "Run when you are successful"
+        }
+        failure {
+            echo "Run when you are fail"
+        }
+    }
+```

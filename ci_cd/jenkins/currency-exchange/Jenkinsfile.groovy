@@ -28,4 +28,16 @@ pipeline {
             }
         }
     }
+    // action to execute after all stages
+    post {
+        always {
+            echo "Always run"
+        }
+        success {
+            echo "Run when you are successful"
+        }
+        failure {
+            echo "Run when you are fail"
+        }
+    }
 }
