@@ -21,8 +21,8 @@ docker-compose up
 ## Create Job
 
 - Manage Jenkins -> Global Tool Configuration -> Maven and Docker 
-- Create job -> Pipeline -> Poll SCM -> * * * * * (every minute)
-- Pipeline -> Pipeline script from SCM -> Git -> https://github.com/vyahello/devops-master-class -> ci_cd/jenkins/currency-exchange/Jenkinsfile (Script Path)
+- Create job -> Pipeline -> Poll SCM -> * * * * * (every minute will check if there are changes and run)
+- Pipeline -> Pipeline script from SCM -> Git -> https://github.com/vyahello/devops-master-class -> ci_cd/jenkins/currency-exchange/Jenkinsfile.groovy (Script Path)
 - We have created http://localhost:8081/job/jenkins-devops-pipeline pipeline 
 - Click 'Build Now'
 
@@ -82,4 +82,21 @@ Add post action
             echo "Run when you are fail"
         }
     }
+```
+
+## Add Jenkins build inside docker container
+
+```groovy
+    agent {
+        docker {
+            image 'maven:3.6.3'
+        }
+    }
+    stages {
+        stage('Build') {
+            steps {
+                sh "mvn --version"
+                echo "Build"
+            }
+        }
 ```

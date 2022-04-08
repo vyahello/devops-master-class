@@ -73,3 +73,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+### Jenkins ###
+jenkins_data
