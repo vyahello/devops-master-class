@@ -553,3 +553,16 @@ Delete EKS clusters and all AWS data.
 
 # Azure Devops with Boards and Backlogs 
 
+Create project via https://azuredevopsdemogenerator.azurewebsites.net
+
+Boards - scrum management tool.
+
+Process -> Agile/Scrum.
+
+Epic - big task, epic divided into features, features divided into user stories, user stories divided into tasks.
+Issues - obstacles to further work.
+
+Backlog - list of tasks in a sprint.
+
+Check project demo project https://dev.azure.com/vjagello93/azure-demo-generator-vyah
+
