@@ -28,3 +28,13 @@ docker-compose up
 
 ## Understand scripted pipelines 
 
+node is a machine that runs your pipeline.
+
+```groovy
+// runs your pipeline
+node {
+	echo "Build"
+	echo "Test"
+	echo "Integration Test"
+}
+```

@@ -1,8 +1,7 @@
+// SCRIPTED pipeline
+// node runs your pipeline
 node {
-	stage('Build') {
-		echo "Build"
-	}
-	stage('Test') {
-		echo "Test"
-	}
+	echo "Build"
+	echo "Test"
+	echo "Test"
 }
