@@ -40,6 +40,7 @@ pipeline {
         stage('Compile') {
             steps {
               dir("ci_cd/jenkins/currency-exchange") {
+                  // compile java code, like nmp install, install all dependencies
                   sh "mvn clean compile"
               }
             }
@@ -48,12 +49,14 @@ pipeline {
         stage('Test') {
             steps {
                 dir("ci_cd/jenkins/currency-exchange") {
+                    // run unit tests
                     sh "mvn test"
                 }
             }
         }
 
         stage('Integration Test') {
+            // surefire runs unit tests and failsafe runs integration tests in Java
             steps {
 	            sh "mvn failsafe:integration-test failsafe:verify"
             }

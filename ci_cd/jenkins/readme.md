@@ -139,4 +139,17 @@ retry(5) {
 
 ## Run unit/integration tests in Jenkins pipeline 
 
+Check `pom.xml` file as a dependency file. 
+
+`surefire` is for unit tests and `failsafe` is for integration tests.
+```xml
+<surefire.version>2.22.1</surefire.version>
+<failsafe.version>2.22.1</failsafe.version>
+```
+
+```xml 
+<groupId>org.apache.maven.plugins</groupId>
+<artifactId>maven-failsafe-plugin</artifactId>
+<version>${failsafe.version}</version>
+```
 
