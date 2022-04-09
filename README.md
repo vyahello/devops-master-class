@@ -27,7 +27,7 @@ git clone git@github.com:vyahello/devops-master-class.git
 - [CI/CD](ci_cd)
 - [Azure](ci_cd/azure_devops_pipelines)
 - [Jenkins](ci_cd/jenkins)
-- Ansible
+- [Ansible](ansible)
 
 Navigate to a corresponding folder section.
 
