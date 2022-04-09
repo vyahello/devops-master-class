@@ -1,0 +1,6 @@
+# configure group of servers
+[dev]
+# public ip address of ec2 instances, could be found via aws
+3.80.29.192
+3.93.240.150
+18.208.145.16

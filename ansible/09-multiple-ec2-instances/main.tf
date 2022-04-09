@@ -54,6 +54,6 @@ resource "aws_instance" "http_server" {
   // taken from terraform.tfstate file
   vpc_security_group_ids = [aws_security_group.http_server_sg.id]
   # https://us-east-1.console.aws.amazon.com/vpc/home?region=us-east-1#subnets:
-  #  subnet_id = "subnet-039846e7279c1418e"
+  # subnet_id = "subnet-039846e7279c1418e"
   subnet_id = tolist(data.aws_subnet_ids.default_subnets.ids)[0]
 }
