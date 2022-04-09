@@ -125,3 +125,18 @@ retry(5) {
     // some block
 }
 ```
+
+## Pipeline with docker and maven 
+
+```groovy
+    environment {
+        dockerHome = tool 'myDocker'
+        mavenHome = tool 'myMaven'
+        PATH = "$dockerHome/bin:$mavenHome/bin:$PATH"
+    
+```
+
+
+## Run unit/integration tests in Jenkins pipeline 
+
+
