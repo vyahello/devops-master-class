@@ -13,7 +13,6 @@ pipeline {
     agent {
         docker {
             image 'maven:3.6.3'
-//             image 'python:3.9'
         }
     }
     // add stages, will be run inside docker container
@@ -21,8 +20,12 @@ pipeline {
         stage('Build') {
             steps {
                 sh "mvn --version"
-//                 sh 'python --version'
                 echo "Build"
+                echo "Build Number - $env.BUILD_NUMBER"
+                echo "BUILD_ID - $env.BUILD_ID"
+                echo "JOB_NAME - $env.JOB_NAME"
+                echo "BUILD_TAG - $env.BUILD_TAG"
+                echo "BUILD_URL - $env.BUILD_URL"
             }
         }
         stage('Test') {

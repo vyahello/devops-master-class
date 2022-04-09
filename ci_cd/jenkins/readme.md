@@ -100,3 +100,28 @@ Add post action
             }
         }
 ```
+
+
+## Pipeline syntax 
+
+https://www.jenkins.io/doc/book/pipeline/
+
+Use Jenkins `Pipeline Syntax` feature.
+
+For example to checkout code in pipeline: 
+```groovy
+checkout(
+  [$class: 'GitSCM', 
+  branches: [[name: '*/master']], 
+  extensions: [], 
+  userRemoteConfigs: 
+  [[url: 'https://github.com/vyahello/devops-master-class']]]
+)
+```
+
+Retry 5 times 
+```groovy
+retry(5) {
+    // some block
+}
+```
