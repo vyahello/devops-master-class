@@ -153,3 +153,28 @@ Check `pom.xml` file as a dependency file.
 <version>${failsafe.version}</version>
 ```
 
+## Build and push docker image 
+
+Give Jenkins docker creds via `Credentials` -> `Global Credentials` -> `Add Credentials` and store as `dockerHub`.
+
+```groovy 
+        stage('Build Docker image') {
+            steps {
+                // docker build -t vyahello/currency-exchange:$env.BUILD_TAG
+                script {
+                    dockerImage = docker.build('vyahello/currency-exchange:${env.BUILD_TAG}')
+                }
+            }
+        }
+        stage('Push Docker image') {
+            steps {
+                script {
+                    // used from credentials
+                    docker.withRegistry('', 'dockerHub') {
+                        dockerImage.push();
+                        dockerImage.push('latest');
+                    }
+                }
+            }
+        }
+```

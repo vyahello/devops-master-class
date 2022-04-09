@@ -46,19 +46,52 @@ pipeline {
             }
         }
 
-        stage('Test') {
+//         stage('Test') {
+//             steps {
+//                 dir("ci_cd/jenkins/currency-exchange") {
+//                     // run unit tests
+//                     sh "mvn test"
+//                 }
+//             }
+//         }
+//
+//         stage('Integration Test') {
+//             // surefire runs unit tests and failsafe runs integration tests in Java
+//             steps {
+//                 dir("ci_cd/jenkins/currency-exchange") {
+//                     sh "mvn failsafe:integration-test failsafe:verify"
+//                 }
+//             }
+//         }
+
+        stage('Package') {
+            // build jar file
             steps {
                 dir("ci_cd/jenkins/currency-exchange") {
-                    // run unit tests
-                    sh "mvn test"
+                    sh "mvn package -DskipTests"
                 }
             }
         }
 
-        stage('Integration Test') {
-            // surefire runs unit tests and failsafe runs integration tests in Java
+        stage('Build Docker image') {
             steps {
-	            sh "mvn failsafe:integration-test failsafe:verify"
+                // docker build -t vyahello/currency-exchange:$env.BUILD_TAG
+                dir("ci_cd/jenkins/currency-exchange") {
+                    script {
+                        dockerImage = docker.build('vyahello/currency-exchange:${env.BUILD_TAG}')
+                    }
+                }
+            }
+        }
+        stage('Push Docker image') {
+            steps {
+                script {
+                    // used from credentials
+                    docker.withRegistry('', 'dockerHub') {
+                        dockerImage.push();
+                        dockerImage.push('latest');
+                    }
+                }
             }
         }
     }

@@ -336,6 +336,12 @@ kubectl get po  # pods
 ```bash
 kubectl delete all -l app=hello-world-rest-api
 kubectl get all
+# delete deployment 
+kubectl get deploy -A
+kubectl delete deploy depName -n nameSpace
+# delete namespace 
+kubectl delete namespaces devops-tools jenkins
+kubectl get ns
 ```
 
 ## Run microservices in k8s
