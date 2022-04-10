@@ -254,3 +254,27 @@ qa1                        : ok=4    changed=0    unreachable=0    failed=0    s
 # you can get vars from there like 'ansible_kernel' and 'ansible_hostname'
 ansible qa -m setup
 ```
+
+## Install http server on hosts 
+
+Install Apache on all dev servers. 
+```yaml
+- hosts: dev
+  become: true
+  tasks:
+    - yum:
+        # install httpd on ec2 instances
+        name:
+          - httpd
+        state: present
+    # we are starting httpd server
+    - service: name=httpd state=started enabled=yes
+    # copy msg to index.html file
+    - raw: 'echo Welcome | sudo tee /var/www/html/index.html'
+```
+
+```bash
+ansible-playbook playbooks/05-install-apache.yaml
+```
+
+Check `http://3.80.29.192` via web, http server should run.

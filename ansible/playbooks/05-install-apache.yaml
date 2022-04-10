@@ -1,0 +1,12 @@
+- hosts: dev
+  become: true
+  tasks:
+    - yum:
+        # install httpd on ec2 instances
+        name:
+          - httpd
+        state: present
+    # we are starting httpd server
+    - service: name=httpd state=started enabled=yes
+    # copy msg to index.html file
+    - raw: 'echo Welcome | sudo tee /var/www/html/index.html'
