@@ -278,3 +278,68 @@ ansible-playbook playbooks/05-install-apache.yaml
 ```
 
 Check `http://3.80.29.192` via web, http server should run.
+
+
+## Reuse ansible playbooks 
+
+```yaml
+- import_playbook: 01-ping.yaml
+- import_playbook: 02-shell.yaml
+- import_playbook: 03-vars.yaml
+```
+
+```bash
+# check all tasks
+ansible-playbook playbooks/06-playbooks.yaml --list-tasks
+# run only on qa env 
+ansible-playbook -l qa playbooks/01-ping.yaml
+```
+
+## Conditional and loops
+
+```yaml
+- hosts: qa
+  vars:
+    system: "Cisco"
+    color: "Red"
+  tasks:
+    - debug: var=ansible_system
+    - debug: var=color
+      # run when system is Linux
+      when: system == 'Linux'
+    # execute loop with multiple items, each item with name and country
+    - debug: var=item
+      with_items:
+      - name: Sam
+        country: US
+      - name: Luke
+        country: GB
+```
+
+
+```bash
+ansible-playbook playbooks/07-conditionals-loops.yaml
+
+ok: [qa1] => (item={'name': 'Sam', 'country': 'US'}) => {
+    "ansible_loop_var": "item",
+    "item": {
+        "country": "US",
+        "name": "Sam"
+    },
+    "item.name": "Sam"
+}
+ok: [qa1] => (item={'name': 'Luke', 'country': 'GB'}) => {
+    "ansible_loop_var": "item",
+    "item": {
+        "country": "GB",
+        "name": "Luke"
+    },
+    "item.name": "Luke"
+}
+```
+
+## EC2 dynamic inventory
+
+```bash
+pip install boto3
+```

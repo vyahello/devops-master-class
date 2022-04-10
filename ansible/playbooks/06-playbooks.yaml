@@ -1,0 +1,3 @@
+- import_playbook: 01-ping.yaml
+- import_playbook: 02-shell.yaml
+- import_playbook: 03-vars.yaml

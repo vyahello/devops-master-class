@@ -1,0 +1,16 @@
+- hosts: qa
+  vars:
+    system: "Cisco"
+    color: "Red"
+  tasks:
+    - debug: var=ansible_system
+    - debug: var=color
+      # run when system is Linux
+      when: system == 'Linux'
+    # execute loop with multiple items, each item with name and country
+    - debug: var=item.name
+      with_items:
+      - name: Sam
+        country: US
+      - name: Luke
+        country: GB
