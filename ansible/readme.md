@@ -71,3 +71,24 @@ ansible all -a 'whoami'
 # ssh to ec2 host
 ssh -vvv -i ~/aws/aws_keys/default-ec2.cer ec2-user@3.80.29.192
 ```
+
+## Ansible host file and host groups 
+
+````text 
+# add host name to ansible_hosts
+
+dev1 ansible_host=3.80.29.192
+dev2 ansible_host=3.93.240.150
+qa1 ansible_host=18.208.145.16
+````
+
+```bash
+# on all devices
+ansible all -a 'python --version'
+# on dev devices only
+ansible dev -a 'python --version'
+# run on a group 
+ansible first -a 'python --version'
+ansible groupofgroups -a 'python --version'
+ansible devsubset -a 'python --version'
+```

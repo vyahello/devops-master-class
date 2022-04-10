@@ -1,6 +1,19 @@
 # configure group of servers
 [dev]
 # public ip address of ec2 instances, could be found via aws
-3.80.29.192
-3.93.240.150
-18.208.145.16
+dev1 ansible_host=3.80.29.192
+dev2 ansible_host=3.93.240.150
+
+[qa]
+qa1 ansible_host=18.208.145.16
+
+[first]
+dev1
+qa1
+
+[groupofgroups:children]
+dev
+first
+
+[devsubset]
+dev[1:2]
