@@ -1,0 +1,11 @@
+# first play
+- hosts: qa
+  tasks:
+    # first task
+    - name: Execute shell commands
+      shell: uname
+      # store output into uname_result var
+      register: uname_result
+    # second task
+    # {{ var }}
+    - debug: msg="{{ uname_result }}"

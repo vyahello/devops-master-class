@@ -98,6 +98,159 @@ ansible --list-host \!first
 ## Add ping playbook 
 
 ```yaml
+# first play
+- hosts: all
+  tasks:
+    # first task
+    - name: Ping All Servers
+      action: ping
+    # second task
+    - debug: msg="First"
+# second play
+# run only on dev hosts
+- hosts: dev
+  tasks:
+    - debug: msg="First"
+```
+
+```bash
 # run playbook
 ansible-playbook playbooks/01-ping.yaml
+```
+
+This is a play that can have multiple tasks.
+
+## Understand control node, managed nodes and Inven 
+
+Scripts -> Ansible -> Server1/2/3 
+
+- Control node - machine where ansible is running, where you control all hosts.
+- Other servers are management nodes.
+- Inven what we have in ansible_host file. 
+
+```yaml
+# first play
+- hosts: qa
+  tasks:
+    # first task
+    - name: Execute shell commands
+      shell: uname
+      register: uname_result
+    # second task
+    # {{ var }}
+    - debug: msg="{{ uname_result }}"
+```
+
+```bash 
+ansible-playbook playbooks/02-shell.yaml
+```
+
+```bash
+PLAY [qa] ********************************************************************************************************
+
+TASK [Gathering Facts] *******************************************************************************************
+
+TASK [Execute shell commands] ************************************************************************************
+changed: [qa1]
+
+TASK [debug] *****************************************************************************************************
+    "msg": {
+        "changed": true,
+        "cmd": "uname",
+        "delta": "0:00:00.038775",
+        "end": "2022-04-10 18:49:09.096328",
+        "failed": false,
+        "msg": "",
+        "rc": 0,
+        "start": "2022-04-10 18:49:09.057553",
+        "stderr": "",
+        "stderr_lines": [],
+        "stdout": "Linux",
+        "stdout_lines": [
+            "Linux"
+        ]
+    }
+}
+
+PLAY RECAP *******************************************************************************************************
+qa1                        : ok=3    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+```
+
+## Ansible variables 
+
+Variables are read via `{{ var }}` syntax.
+
+```yaml
+# first play
+- hosts: dev
+  vars_files:
+    - variables.yaml
+  tasks:
+    # first task
+    - name: Var Value
+      debug: msg="Value is {{ var1 }}"
+```
+
+Use from var command line
+```bash
+ansible-playbook playbooks/03-vars.yaml -e var1=CMDVal
+```
+
+Read vars from file
+```yaml
+# variables.yaml
+
+var1: "Yaml Value"
+```
+
+## Ansible Facts
+
+Facts are general info about ansible controller and managed hosts collected in setup. 
+
+```yaml
+- hosts: qa
+  tasks:
+    - name: Kernel
+      debug: msg="{{ ansible_kernel }}"
+    - name: Hostname
+      debug: msg="{{ ansible_hostname }}"
+    - name: Distrib
+      debug: msg="{{ ansible_distribution }}"
+    - debug: var=ansible_architecture
+```
+
+```bash
+ansible-playbook playbooks/04-facts.yaml
+
+PLAY [qa] ********************************************************************************************************
+
+TASK [Gathering Facts] *******************************************************************************************
+ok: [qa1]
+
+TASK [Kernel] ****************************************************************************************************
+    "msg": "5.10.102-99.473.amzn2.x86_64"
+}
+
+TASK [Kernel] ****************************************************************************************************
+ok: [qa1] => {
+    "msg": "ip-172-31-84-123"
+}
+
+TASK [Kernel] ****************************************************************************************************
+ok: [qa1] => {
+    "msg": "Amazon"
+}
+ok: [qa1] => {
+    "ansible_architecture": "x86_64"
+}
+
+PLAY RECAP *******************************************************************************************************
+qa1                        : ok=4    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0  
+```
+
+
+```bash
+# list of servers ansible managing right now
+# you can get vars from there like 'ansible_kernel' and 'ansible_hostname'
+ansible qa -m setup
 ```

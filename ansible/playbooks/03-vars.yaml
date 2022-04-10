@@ -1,0 +1,8 @@
+# first play
+- hosts: dev
+  vars_files:
+    - variables.yaml
+  tasks:
+    # first task
+    - name: Var Value
+      debug: msg="Value is {{ var1 }}"

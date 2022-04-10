@@ -1,5 +1,13 @@
----
+# first play
 - hosts: all
   tasks:
+    # first task
     - name: Ping All Servers
       action: ping
+    # second task
+    - debug: msg="First"
+# second play
+# run only on dev hosts
+- hosts: dev
+  tasks:
+    - debug: msg="First"
