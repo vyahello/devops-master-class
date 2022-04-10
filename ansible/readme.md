@@ -91,4 +91,13 @@ ansible dev -a 'python --version'
 ansible first -a 'python --version'
 ansible groupofgroups -a 'python --version'
 ansible devsubset -a 'python --version'
+ansible --list-host all
+ansible --list-host \!first
+```
+
+## Add ping playbook 
+
+```yaml
+# run playbook
+ansible-playbook playbooks/01-ping.yaml
 ```
