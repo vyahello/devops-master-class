@@ -32,6 +32,34 @@ IAAC - create infra the same way you create your software code. Create infra - s
 - Version control everything
 - Self provision. Dev team should not wait for operation team for provision, they should be able to provision servers on their own.
 
+DevOps maturity development:
+  - Does every commit triggers automated tests and automated code quality?
+  - Is your code continuously delivered to prod?
+  - Do you use pair programming?
+  - Do you use TDD and BDD?
+  - Can dev team self provision envs?
+  - How long it tak to deliver a quick fix?
+
+DevOps maturity test:
+  - Are your tests full automated with high quality?
+  - Do your builds fail when your automated tests fail?
+  - Are your testing cycles small? How much time it take?
+  - Do you have automated non-functional tests (load, perf, etc.)? 
+
+DevOps maturity deployment:
+  - Do you have dev/prod similarity?
+  - Do you use a/b testing?
+  - Do you use canary deployments?
+  - Can you deploy at the click of a button?
+  - Can you rollback at the click of a button?
+  - Can you provision and release infra?
+  - Do you use IAAC and version control?
+
+DevOps maturity monitoring:
+  - Does the team use monitoring system?
+  - Can dev team get access to logs at the click of button?
+  - Can the team get an automated alert if something goes wrong in prod?
+  
 ## Docker
 
 Reasons - application packaging (same for java, python, js), multi-platform (local machine, data center, cloud), 
