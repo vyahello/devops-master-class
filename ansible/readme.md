@@ -17,6 +17,8 @@ ansible --version
 
 ## Create EC2 instance for ansible 
 
+https://us-east-1.console.aws.amazon.com/ec2
+
 Ansible talks to servers via ssh keys to manage software.
 
 Go to AWS and create EC2 instance. 
@@ -371,3 +373,54 @@ ansible-inventory --list
 ansible-inventory --graph
 ansible-playbook playbooks/08-dynamic.yaml
 ```
+
+## Create EC2 with ansible
+
+https://us-east-1.console.aws.amazon.com/ec2
+
+You can use ansible for provision servers. 
+
+```yaml
+- hosts: localhost
+  tasks:
+    # create ec2 instances
+    - ec2:
+        # taken from Key Pairs
+        key_name: default-ec2
+        instance_type: t2.micro
+        # AMI - simple template for all the software.
+        image: ami-0c02fb55956c7d316
+        region: us-east-1
+        # how many instances
+        count: 1
+        # took from launch instance -> Configure Instance -> subnet id
+        vpc_subnet_id: subnet-03e9bbe7f48e853a7
+        assign_public_ip: yes
+        # security group
+        group: ["http_server_sg"]
+        instance_tags: {type: http, Environment: QA}
+        wait: yes
+      register: ec2_output
+    - debug: var=ec2_output
+```
+
+```bash
+ansible-playbook playbooks/09-create-ec2.yaml
+```
+
+## Declarative configuration for ansible
+
+```yaml
+...
+  exact_count: 2
+  count_tag: {type: http}  # create instances wih tag 'http'
+...
+```
+
+## Delete EC2 instances 
+
+```bash
+cd 09-multiple-ec2-instances
+terraform destroy
+```
+

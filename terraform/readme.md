@@ -518,7 +518,7 @@ Terraform is used to create multiple virtual servers in cloud e.g AWS.
 ### Create EC2 instance
 
 Create EC2 via UI:
-  - Step 1: Choose an Amazon Machine Image (AMI) - ami-0c02fb55956c7d316
+  - Step 1: Choose an Amazon Machine Image (AMI) - ami-0c02fb55956c7d316. AMI - simple template for all the software.
   - Step 2: Choose an Instance Type (cpu, ram, hardware) - t2.micro
   - Step 3: Configure Instance Details
     - VPC (virtual private cloud) - private network in AWS cloud, you can create subnets here. If you dont want share access with resource - put it into private zone, otherwise use public zone.

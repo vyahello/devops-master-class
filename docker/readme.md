@@ -11,6 +11,8 @@ make deployment easier, operations work visible. automate as much software activ
 
 Devops automation focus on provision server, install software, configure software, deploy app
 
+Business -> Development -> Operations. DevOps - CAMS (culture, automation, measurement, sharing).
+
 Continious Deployment - cont deploy new version of software. 
 Code commit -> unit tests -> integration tests -> package -> deploy -> automated tests
 
@@ -18,6 +20,17 @@ Continious Delivery - cont deploy software to production.
 Code commit -> unit tests -> integration tests -> package -> deploy -> automated tests -> testing approvals -> deploy next
 
 IAAC - create infra the same way you create your software code. Create infra - servers, load balancers, db using code and configuration.
+
+## DevOps Best practices 
+
+- Standardization. U have standard ways how things are done
+- Teams with Cross-Functional Skill
+- Focus on Culture
+- Automate everything
+- Immutable infrastructure. If there are changes for server, create new server but not changing existed.
+- Dev/Prod env similar, deploy/monitor apps the same way. If envs are similar you can find problems early.
+- Version control everything
+- Self provision. Dev team should not wait for operation team for provision, they should be able to provision servers on their own.
 
 ## Docker
 

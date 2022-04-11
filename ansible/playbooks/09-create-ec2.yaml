@@ -1,0 +1,23 @@
+- hosts: localhost
+  tasks:
+    # create ec2 instances
+    - ec2:
+        # taken from Key Pairs
+        key_name: default-ec2
+        instance_type: t2.micro
+        # AMI - simple template for all the software.
+        image: ami-0c02fb55956c7d316
+        region: us-east-1
+        # how many instances
+        # count: 1
+        exact_count: 2
+        count_tag: {type: http}  # create instances wih tag 'http'
+        # took from launch instance -> Configure Instance -> subnet id
+        vpc_subnet_id: subnet-03e9bbe7f48e853a7
+        assign_public_ip: yes
+        # security group
+        group: ["http_server_sg"]
+        instance_tags: {type: http, Environment: QA}
+        wait: yes
+      register: ec2_output
+    - debug: var=ec2_output
