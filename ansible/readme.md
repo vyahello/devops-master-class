@@ -340,6 +340,34 @@ ok: [qa1] => (item={'name': 'Luke', 'country': 'GB'}) => {
 
 ## EC2 dynamic inventory
 
+Multiple EC2 servers we created via terraform.
+
 ```bash
 pip install boto3
+```
+
+Create `01-aws_ec2.yaml` dynamic inventory file.
+
+```yaml
+plugin: aws_ec2
+region:
+  - us-east-1
+# add groups
+keyed_groups:
+  - prefix: arch # will group based on architecture
+    key: 'architecture'
+  - prefix: tag
+    key: 'tags' # will group based on tag
+  - key: tags.Env
+    separator: ''
+  - key: instance_type
+    prefix: instance_type
+```
+
+```bash
+# list of servers info
+ansible-inventory --list
+# group instances
+ansible-inventory --graph
+ansible-playbook playbooks/08-dynamic.yaml
 ```

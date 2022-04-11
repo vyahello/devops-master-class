@@ -1,0 +1,13 @@
+# first play
+- hosts: all
+  tasks:
+    # first task
+    - name: Ping All Servers
+      action: ping
+    # second task
+    - debug: msg="First"
+# second play
+# run only on dynamic hosts that set in 01_aws_ec2.yaml file
+- hosts: aws_ec2
+  tasks:
+    - debug: msg="First"

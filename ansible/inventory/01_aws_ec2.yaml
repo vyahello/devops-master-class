@@ -1,0 +1,13 @@
+plugin: aws_ec2
+region:
+  - us-east-1
+# add groups
+keyed_groups:
+  - prefix: arch # will group based on architecture
+    key: 'architecture'
+  - prefix: tag
+    key: 'tags' # will group based on tag
+  - key: tags.Env
+    separator: ''
+  - key: instance_type
+    prefix: instance_type
