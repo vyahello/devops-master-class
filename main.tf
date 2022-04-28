@@ -12,3 +12,4 @@ resource "null_resource" "executor" {
 output "command" {
   value = var.command
 }
+
